@@ -1,0 +1,24 @@
+/* src/index.css */
+
+/* Un reseteo básico para que los estilos se vean consistentes en todos los navegadores */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Esta es una regla muy útil que facilita el manejo de tamaños */
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #1a1a1a; /* Un fondo oscuro */
+    color: #f0f0f0; /* Texto claro para contraste */
+    line-height: 1.6;
+  }
+  
+  /* El div donde se monta nuestra aplicación React */
+  #root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    min-height: 100vh;
+  }

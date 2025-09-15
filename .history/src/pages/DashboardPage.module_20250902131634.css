@@ -1,0 +1,148 @@
+/* src/pages/DashboardPage.module.css */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .dashboardContainer {
+    width: 100%;
+    max-width: 800px;
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .title {
+    margin-bottom: 2rem;
+    font-weight: 600;
+  }
+  
+  .card {
+    background-color: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .card h2 {
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 1rem;
+  }
+  
+  .formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto; /* 3 columnas: nombre, cantidad, botón */
+    gap: 1rem;
+    align-items: flex-end;
+  }
+  
+  .input, select {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(138, 92, 246, 0.3);
+  }
+  
+  .button {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap; /* Evita que el texto del botón se parta */
+    transition: background-color 0.2s;
+  }
+  
+  .button:hover {
+    background-color: var(--color-primary-hover);
+  }
+  
+  .productList {
+    list-style: none;
+  }
+  
+  .productItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .productItem:last-child {
+    border-bottom: none;
+  }
+  
+  .productName {
+    font-weight: 500;
+  }
+  
+  .productName span {
+    font-weight: 300;
+    color: var(--color-text-secondary);
+  }
+  
+  .actionButtons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .quantityText {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .actionButtons button {
+    padding: 0.4rem 0.8rem;
+    background-color: #374151;
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .actionButtons button:hover {
+    background-color: #4b5563;
+  }
+  
+  /* ---- REGLAS RESPONSIVAS ---- */
+  @media (max-width: 600px) {
+    .formGrid, .salesFormGrid { /* <-- AÑADE .salesFormGrid AQUÍ */
+      grid-template-columns: 1fr; 
+    }
+  
+    .productItem {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+  }
+
+  .salesFormGrid {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto; /* Columna más ancha para el select */
+    gap: 1rem;
+    align-items: flex-end;
+  }
+  
+  /* También añadimos la nueva clase a la regla responsiva */
+  

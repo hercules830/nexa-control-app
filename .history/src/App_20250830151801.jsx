@@ -1,0 +1,37 @@
+// src/App.jsx
+
+import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion'; // 1. Importamos AnimatePresence
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+
+// 1. Crearemos un componente simple para el "Dashboard" o la página principal.
+//    Más adelante lo moveremos a su propio archivo.
+
+function App() {
+  // 2. Creamos el estado de autenticación aquí, en el componente padre.
+  //    Por defecto, el usuario no está logueado (false).
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 3. Creamos una función que cambia el estado a 'logueado'.
+  //    Esta es la función que le pasaremos a LoginPage.
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      {/* 4. Aquí ocurre la magia: Renderizado Condicional */}
+      {/* Si 'isLoggedIn' es true, muestra el componente DashboardPage. */}
+      {/* Si 'isLoggedIn' es false, muestra el componente LoginPage. */}
+      {isLoggedIn ? (
+
+        <DashboardPage />
+      ) : (
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
+      )}
+    </AnimatePresence>
+  );
+}
+
+export default App;

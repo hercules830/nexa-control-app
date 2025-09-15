@@ -1,0 +1,588 @@
+import { useState, useEffect, useMemo } from "react";
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from "framer-motion";
+import { auth, db } from "../firebase";
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  doc,
+  updateDoc,
+  writeBatch,
+  deleteDoc,
+} from "firebase/firestore";
+import { signOut } from "firebase/auth";
+import styles from "./DashboardPage.module.css";
+import toast from "react-hot-toast";
+import HighlightText from "../components/HighlightText";
+
+function DashboardPage({ user }) {
+  // --- ESTADOS ---
+
+  const [products, setProducts] = useState([]);
+  const [insumos, setInsumos] = useState([]);
+  const [salesHistory, setSalesHistory] = useState([]);
+
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: "",
+    type: "direct",
+    insumoId: "",
+    recipe: [],
+  });
+  const [selectedInsumoIdForRecipe, setSelectedInsumoIdForRecipe] = useState("");
+  const [recipeQuantity, setRecipeQuantity] = useState("");
+
+  const [newInsumo, setNewInsumo] = useState({
+    name: "",
+    quantity: "",
+    unit: "",
+    totalCost: "",
+    alertThreshold: "",
+  });
+  
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [saleQuantity, setSaleQuantity] = useState(1);
+  const [currentTicket, setCurrentTicket] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState("efectivo");
+
+  const [activeTab, setActiveTab] = useState("ventas");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+
+    const productsCollectionRef = collection(db, "users", user.uid, "products");
+    const unsubscribeProducts = onSnapshot(productsCollectionRef, (snapshot) => {
+      setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const insumosCollectionRef = collection(db, "users", user.uid, "insumos");
+    const unsubscribeInsumos = onSnapshot(insumosCollectionRef, (snapshot) => {
+      setInsumos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const salesCollectionRef = collection(db, "users", user.uid, "sales");
+    const unsubscribeSales = onSnapshot(salesCollectionRef, (snapshot) => {
+      const salesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      salesData.sort((a, b) => b.ticketId - a.ticketId);
+      setSalesHistory(salesData);
+    });
+
+    return () => {
+      unsubscribeProducts();
+      unsubscribeInsumos();
+      unsubscribeSales();
+    };
+  }, [user]);
+
+  const handleAddProduct = async (event) => {
+    event.preventDefault();
+    if (newProduct.price.trim() === "" || isNaN(newProduct.price)) {
+      toast.error("El precio del producto es obligatorio.");
+      return;
+    }
+    let finalCost = 0;
+    let finalRecipe = [];
+    let insumoDirectoId = null;
+    let finalName = newProduct.name;
+
+    if (newProduct.type === 'recipe') {
+      if (newProduct.name.trim() === "") {
+        toast.error("El nombre del producto es obligatorio para recetas.");
+        return;
+      }
+      if (newProduct.recipe.length === 0) {
+        toast.error("Para un producto con receta, debes agregar al menos un insumo.");
+        return;
+      }
+      finalCost = newProduct.recipe.reduce((sum, item) => sum + (item.quantityUsed * item.cost), 0);
+      finalRecipe = newProduct.recipe;
+    } else { // tipo 'direct'
+      if (!newProduct.insumoId) {
+        toast.error("Para un producto de reventa, debes seleccionar el insumo correspondiente.");
+        return;
+      }
+      const insumoSource = insumos.find(i => i.id === newProduct.insumoId);
+      if (!insumoSource) {
+        toast.error("El insumo seleccionado ya no existe.");
+        return;
+      }
+      finalCost = insumoSource.cost;
+      insumoDirectoId = newProduct.insumoId;
+      finalName = insumoSource.name;
+    }
+
+    try {
+      const productsCollectionRef = collection(db, "users", user.uid, "products");
+      await addDoc(productsCollectionRef, {
+        name: finalName,
+        price: Number(newProduct.price),
+        cost: finalCost,
+        type: newProduct.type,
+        recipe: finalRecipe,
+        insumoId: insumoDirectoId
+      });
+      toast.success("¡Producto guardado con éxito!");
+      setNewProduct({ name: "", price: "", type: "direct", insumoId: "", recipe: [] });
+    } catch (error) {
+      console.error("Error al añadir producto:", error);
+      toast.error("Error al guardar el producto.");
+    }
+  };
+  
+  const handleAddRecipeItem = () => {
+    if (!selectedInsumoIdForRecipe || !recipeQuantity || isNaN(recipeQuantity) || Number(recipeQuantity) <= 0) {
+      toast.error("Selecciona un insumo y una cantidad válida.");
+      return;
+    }
+    const insumoDetails = insumos.find(i => i.id === selectedInsumoIdForRecipe);
+    if (!insumoDetails) {
+        toast.error("Insumo no encontrado.");
+        return;
+    }
+    const newItem = {
+      insumoId: insumoDetails.id,
+      name: insumoDetails.name,
+      unit: insumoDetails.unit,
+      quantityUsed: Number(recipeQuantity),
+      cost: insumoDetails.cost,
+    };
+    setNewProduct(prev => ({ ...prev, recipe: [...prev.recipe, newItem] }));
+    setSelectedInsumoIdForRecipe("");
+    setRecipeQuantity("");
+  };
+
+  const handleRemoveRecipeItem = (index) => {
+    setNewProduct(prev => ({ ...prev, recipe: prev.recipe.filter((_, i) => i !== index) }));
+  };
+
+  const handleDeleteProduct = async (productId, productName) => {
+    if (window.confirm(`¿Seguro que quieres eliminar el producto "${productName}"?`)) {
+      try {
+        const productDocRef = doc(db, "users", user.uid, "products", productId);
+        await deleteDoc(productDocRef);
+        toast.success(`"${productName}" fue eliminado.`);
+      } catch (error) {
+        toast.error("No se pudo eliminar el producto.");
+      }
+    }
+  };
+
+  const handleAddInsumo = async (event) => {
+    event.preventDefault();
+    const quantity = Number(newInsumo.quantity);
+    const totalCost = Number(newInsumo.totalCost);
+
+    if (newInsumo.name.trim() === "" || isNaN(quantity) || quantity <= 0 || newInsumo.unit === "" || isNaN(totalCost) || totalCost < 0) {
+      toast.error("Nombre, cantidad de unidades, unidad y costo total son obligatorios.");
+      return;
+    }
+    const costPerUnit = totalCost / quantity;
+
+    try {
+      const insumosCollectionRef = collection(db, "users", user.uid, "insumos");
+      await addDoc(insumosCollectionRef, {
+        name: newInsumo.name,
+        quantity: quantity,
+        unit: newInsumo.unit,
+        cost: costPerUnit,
+        alertThreshold: newInsumo.alertThreshold ? Number(newInsumo.alertThreshold) : null,
+      });
+      toast.success(`Insumo añadido! Costo por unidad: $${costPerUnit.toFixed(2)}`);
+      setNewInsumo({ name: "", quantity: "", unit: "", totalCost: "", alertThreshold: "" });
+    } catch (error) {
+      console.error("Error al añadir el insumo:", error);
+      toast.error("Error al añadir el insumo.");
+    }
+  };
+
+  const handleIncrementInsumoQuantity = async (insumoId, currentQuantity) => {
+    try {
+      const insumoDocRef = doc(db, "users", user.uid, "insumos", insumoId);
+      await updateDoc(insumoDocRef, { quantity: currentQuantity + 1 });
+    } catch (error) {
+      toast.error("No se pudo actualizar el insumo.");
+    }
+  };
+  
+  const handleDecrementInsumoQuantity = async (insumoId, currentQuantity) => {
+    if (currentQuantity <= 0) return;
+    try {
+      const insumoDocRef = doc(db, "users", user.uid, "insumos", insumoId);
+      await updateDoc(insumoDocRef, { quantity: currentQuantity - 1 });
+    } catch (error) {
+      toast.error("No se pudo actualizar el insumo.");
+    }
+  };
+  
+  const handleAddItemToTicket = (event) => {
+    event.preventDefault();
+    if (!selectedProductId) {
+      toast.error("Por favor, selecciona un producto.");
+      return;
+    }
+    const productToAdd = products.find((p) => p.id === selectedProductId);
+    if (!productToAdd) {
+      toast.error("Producto no encontrado.");
+      return;
+    }
+    const newItem = {
+      productId: productToAdd.id,
+      name: productToAdd.name,
+      quantity: saleQuantity,
+      price: productToAdd.price,
+      cost: productToAdd.cost || 0,
+      recipe: productToAdd.recipe || [],
+      type: productToAdd.type,
+      insumoId: productToAdd.insumoId
+    };
+    setCurrentTicket([...currentTicket, newItem]);
+    setSelectedProductId("");
+    setSaleQuantity(1);
+  };
+  
+  const handleFinalizeSale = async () => {
+    if (currentTicket.length === 0) {
+      toast.error("El ticket está vacío.");
+      return;
+    }
+    const batch = writeBatch(db);
+    const ticketId = Date.now();
+    try {
+      for (const ticketItem of currentTicket) {
+        if (ticketItem.type === 'recipe') {
+          if (ticketItem.recipe && ticketItem.recipe.length > 0) {
+            for (const recipeItem of ticketItem.recipe) {
+              const insumoDocRef = doc(db, "users", user.uid, "insumos", recipeItem.insumoId);
+              const insumoInStock = insumos.find(i => i.id === recipeItem.insumoId);
+              if (!insumoInStock) {
+                  toast.error(`El insumo "${recipeItem.name}" no fue encontrado. Venta cancelada.`);
+                  return;
+              }
+              const quantityToDeduct = recipeItem.quantityUsed * ticketItem.quantity;
+              if (insumoInStock.quantity < quantityToDeduct) {
+                toast.error(`Stock insuficiente para "${insumoInStock.name}". Venta cancelada.`);
+                return;
+              }
+              batch.update(insumoDocRef, { quantity: insumoInStock.quantity - quantityToDeduct });
+            }
+          }
+        } else {
+          const insumoDocRef = doc(db, "users", user.uid, "insumos", ticketItem.insumoId);
+          const insumoInStock = insumos.find(i => i.id === ticketItem.insumoId);
+          if (!insumoInStock) {
+            toast.error(`El insumo "${ticketItem.name}" no fue encontrado. Venta cancelada.`);
+            return;
+          }
+          const quantityToDeduct = ticketItem.quantity;
+           if (insumoInStock.quantity < quantityToDeduct) {
+              toast.error(`Stock insuficiente para "${insumoInStock.name}". Venta cancelada.`);
+              return;
+            }
+          batch.update(insumoDocRef, { quantity: insumoInStock.quantity - quantityToDeduct });
+        }
+        
+        const saleDocRef = doc(collection(db, "users", user.uid, "sales"));
+        const newSaleData = {
+          ticketId: ticketId,
+          productId: ticketItem.productId,
+          productName: ticketItem.name,
+          quantity: ticketItem.quantity,
+          price: ticketItem.price,
+          cost: ticketItem.cost,
+          profit: (ticketItem.price - ticketItem.cost) * ticketItem.quantity,
+          paymentMethod: paymentMethod,
+          date: new Date().toISOString(),
+        };
+        batch.set(saleDocRef, newSaleData);
+      }
+      await batch.commit();
+      toast.success("¡Venta finalizada y stock actualizado!");
+      setCurrentTicket([]);
+      setPaymentMethod("efectivo");
+    } catch (error) {
+      console.error("Error al finalizar la venta:", error);
+      toast.error("Error al procesar la venta.");
+    }
+  };
+  
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error al cerrar sesión", error);
+    }
+  };
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setIsModalOpen(true);
+  };
+  
+  const handleUpdateProduct = async (event) => {
+    event.preventDefault();
+    if (!editingItem) return;
+    // (Esta lógica se completará cuando hagamos la edición de recetas)
+    toast.info("La edición de productos con recetas aún no está implementada.");
+    setIsModalOpen(false);
+  };
+
+  const reportData = useMemo(() => {
+    const filteredSales = selectedDate
+      ? salesHistory.filter((sale) => new Date(sale.date).toLocaleDateString("en-CA") === selectedDate)
+      : salesHistory;
+    const groupedSales = filteredSales.reduce((acc, sale) => {
+      const ticketId = sale.ticketId;
+      if (!acc[ticketId]) {
+        acc[ticketId] = { ticketId: ticketId, items: [], date: new Date(sale.date).toLocaleString("es-MX"), paymentMethod: sale.paymentMethod, total: 0 };
+      }
+      acc[ticketId].items.push(sale);
+      acc[ticketId].total += sale.price * sale.quantity;
+      return acc;
+    }, {});
+    const groupedSalesArray = Object.values(groupedSales).sort((a, b) => b.ticketId - a.ticketId);
+    const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.price * sale.quantity, 0);
+    const totalProfit = filteredSales.reduce((sum, sale) => sum + sale.profit, 0);
+    const totalSalesCount = Object.keys(groupedSales).length;
+    const profitByProduct = filteredSales.reduce((acc, sale) => {
+      acc[sale.productName] = (acc[sale.productName] || 0) + sale.profit;
+      return acc;
+    }, {});
+    const mostProfitableProduct = Object.keys(profitByProduct).reduce((a, b) => (profitByProduct[a] > profitByProduct[b] ? a : b), "N/A");
+    const inventoryValueByCost = insumos.reduce((sum, insumo) => sum + (insumo.cost || 0) * insumo.quantity, 0);
+    return {
+      groupedSalesArray,
+      totalRevenue,
+      totalProfit,
+      totalSalesCount,
+      mostProfitableProduct,
+      inventoryValueByCost,
+    };
+  }, [salesHistory, insumos, selectedDate]);
+
+  return (
+    <motion.div className={styles.dashboardContainer} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} transition={{ duration: 0.5 }}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Gestión de Negocio</h1>
+        <button onClick={handleLogout} className={styles.logoutButton}>Cerrar Sesión</button>
+      </div>
+      <div className={styles.tabs}>
+        <button className={`${styles.tabButton} ${activeTab === "ventas" ? styles.activeTab : ""}`} onClick={() => setActiveTab("ventas")}>Ventas</button>
+        <button className={`${styles.tabButton} ${activeTab === "products" ? styles.activeTab : ""}`} onClick={() => setActiveTab("products")}>Mis Productos</button>
+        <button className={`${styles.tabButton} ${activeTab === "insumos" ? styles.activeTab : ""}`} onClick={() => setActiveTab("insumos")}>Insumos</button>
+        <button className={`${styles.tabButton} ${activeTab === "reportes" ? styles.activeTab : ""}`} onClick={() => setActiveTab("reportes")}>Reportes</button>
+      </div>
+      <div className={styles.tabContent}>
+        {activeTab === "ventas" && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+          <section className={styles.card}>
+            <h2>Crear Ticket de Venta</h2>
+            <form onSubmit={handleAddItemToTicket} className={styles.salesFormGrid}>
+              <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)} className={styles.input}>
+                <option value="" disabled>-- Selecciona un producto --</option>
+                {products.map((product) => (<option key={product.id} value={product.id}>{product.name}</option>))}
+              </select>
+              <input type="number" placeholder="Cantidad" className={styles.input} value={saleQuantity} onChange={(e) => setSaleQuantity(Number(e.target.value))} />
+              <button type="submit" className={styles.button}>Agregar al Ticket</button>
+            </form>
+          </section>
+          <section className={styles.card}>
+            <h2>Ticket Actual</h2>
+            <ul className={styles.ticketList}>
+              {currentTicket.length === 0 ? (<p>Añade productos para empezar un nuevo ticket.</p>) : (currentTicket.map((item, index) => (<li key={index} className={styles.ticketItem}><span>{item.quantity} x {item.name}</span><span>${(item.price * item.quantity).toFixed(2)}</span></li>)))}
+            </ul>
+            <div className={styles.ticketSummary}>
+              <div className={styles.paymentOptions}>
+                <label><input type="radio" value="efectivo" checked={paymentMethod === "efectivo"} onChange={(e) => setPaymentMethod(e.target.value)}/>Efectivo</label>
+                <label><input type="radio" value="tarjeta" checked={paymentMethod === "tarjeta"} onChange={(e) => setPaymentMethod(e.target.value)}/>Tarjeta</label>
+              </div>
+              <div className={styles.ticketTotal}>
+                <strong>TOTAL:</strong>
+                <span>${currentTicket.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}</span>
+              </div>
+            </div>
+            <button onClick={handleFinalizeSale} className={styles.finalizeButton} disabled={currentTicket.length === 0}>Finalizar Venta</button>
+          </section>
+        </motion.div>)}
+        {activeTab === "products" && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+          <section className={styles.card}>
+            <h2>Agregar Nuevo Producto</h2>
+            <form onSubmit={handleAddProduct} className={styles.productFormGrid}>
+              <div className={styles.productTypeSelector}>
+                <label><input type="radio" value="direct" checked={newProduct.type === 'direct'} onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value, recipe: [] })}/>Reventa (Usa 1 Insumo)</label>
+                <label><input type="radio" value="recipe" checked={newProduct.type === 'recipe'} onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value, insumoId: '' })}/>Producido (Usa Receta)</label>
+              </div>
+              {newProduct.type === 'direct' ? (
+                <select value={newProduct.insumoId} onChange={(e) => {const selectedInsumo = insumos.find(i => i.id === e.target.value); setNewProduct({...newProduct, insumoId: e.target.value, name: selectedInsumo ? selectedInsumo.name : ""});}} className={styles.input}>
+                  <option value="" disabled>-- Selecciona un Insumo para Vender --</option>
+                  {insumos.map(insumo => (<option key={insumo.id} value={insumo.id}>{insumo.name}</option>))}
+                </select>
+              ) : (
+                <input type="text" placeholder="Nombre del Producto con Receta" className={styles.input} value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}/>
+              )}
+              <input type="number" placeholder="Precio de Venta ($)" className={styles.input} value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} min="0"/>
+              {newProduct.type === 'recipe' && (
+                <>
+                  <h3 className={styles.recipeTitle}>Definir Receta</h3>
+                  <div className={styles.recipeFormGrid}>
+                    <select value={selectedInsumoIdForRecipe} onChange={(e) => setSelectedInsumoIdForRecipe(e.target.value)} className={styles.input}>
+                      <option value="" disabled>-- Selecciona Insumo --</option>
+                      {insumos.map(insumo => (<option key={insumo.id} value={insumo.id}>{insumo.name} ({insumo.unit})</option>))}
+                    </select>
+                    <input type="number" placeholder="Cantidad usada" className={styles.input} value={recipeQuantity} onChange={(e) => setRecipeQuantity(e.target.value)} min="0"/>
+                    <button type="button" onClick={handleAddRecipeItem} className={styles.addRecipeButton}>+</button>
+                  </div>
+                  <ul className={styles.recipeList}>
+                    {newProduct.recipe.length === 0 ? (<li className={styles.recipeEmpty}>Aún no hay ingredientes.</li>) : (newProduct.recipe.map((item, index) => (<li key={index} className={styles.recipeItem}><span>{item.quantityUsed} {item.unit} de {item.name}</span><button type="button" onClick={() => handleRemoveRecipeItem(index)} className={styles.removeRecipeButton}>x</button></li>)))}
+                  </ul>
+                </>
+              )}
+              <button type="submit" className={styles.button}>Guardar Producto</button>
+            </form>
+          </section>
+          <section className={styles.card}>
+            <h2>Mis Productos Vendibles</h2>
+            <div className={styles.productGrid}>
+              {products.length === 0 ? (<p>No has agregado productos.</p>) : (products.map((product) => (
+                <div key={product.id} className={styles.productCard}>
+                  <div className={styles.productImagePlaceholder}></div>
+                  <div className={styles.productCardInfo}>
+                    <h4 className={styles.productCardName}>{product.name}</h4>
+                    <p className={styles.productCardPrice}>${product.price.toFixed(2)}</p>
+                  </div>
+                  <div className={styles.productCardActions}>
+                    <button className={styles.actionButton} onClick={() => openEditModal(product)}>Editar</button>
+                    <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeleteProduct(product.id, product.name)}>Borrar</button>
+                  </div>
+                </div>
+              )))}
+            </div>
+          </section>
+        </motion.div>)}
+        {activeTab === "insumos" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <section className={styles.card}>
+              <h2>Agregar Nuevo Insumo</h2>
+              <form onSubmit={handleAddInsumo} className={styles.insumoFormGrid}>
+                <input type="text" placeholder="Nombre del Insumo" className={styles.input} value={newInsumo.name} onChange={(e) => setNewInsumo({ ...newInsumo, name: e.target.value })}/>
+                <input type="number" placeholder="Cantidad de Unidades" className={styles.input} value={newInsumo.quantity} onChange={(e) => setNewInsumo({ ...newInsumo, quantity: e.target.value })} min="1"/>
+                <select className={styles.input} value={newInsumo.unit} onChange={(e) => setNewInsumo({ ...newInsumo, unit: e.target.value })}>
+                  <option value="" disabled>-- Selecciona Unidad --</option>
+                  <option value="pz">Pieza (pz)</option>
+                  <option value="kg">Kilogramo (kg)</option>
+                  <option value="g">Gramo (g)</option>
+                  <option value="lt">Litro (lt)</option>
+                  <option value="ml">Mililitro (ml)</option>
+                </select>
+                <input type="number" placeholder="Costo Total del Paquete ($)" className={styles.input} value={newInsumo.totalCost} onChange={(e) => setNewInsumo({ ...newInsumo, totalCost: e.target.value })} min="0"/>
+                <input type="number" placeholder="Alerta de Stock (Opcional)" className={styles.input} value={newInsumo.alertThreshold} onChange={(e) => setNewInsumo({ ...newInsumo, alertThreshold: e.target.value })}/>
+                <button type="submit" className={styles.button}>Agregar Insumo</button>
+              </form>
+            </section>
+            <section className={styles.card}>
+              <h2>Inventario de Insumos</h2>
+              <div className={styles.searchBar}>
+                <input type="text" placeholder="Buscar insumo por nombre..." className={styles.input} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+              </div>
+              {(() => {
+                const filteredInsumos = insumos.filter((insumo) => insumo.name.toLowerCase().includes(searchTerm.toLowerCase()));
+                return (
+                  <ul className={styles.insumoList}>
+                    {filteredInsumos.length === 0 ? (<p>No se encontraron insumos.</p>) : (filteredInsumos.map((insumo) => (
+                      <li key={insumo.id} className={`${styles.insumoItem} ${(insumo.alertThreshold != null && insumo.quantity <= insumo.alertThreshold) ? styles.lowStock : ""}`}>
+                        <div className={styles.insumoInfo}>
+                          <span className={styles.insumoName}><HighlightText text={insumo.name} highlight={searchTerm} /></span>
+                          <span className={styles.insumoCost}>
+  Costo: ${(insumo.cost || 0).toFixed(2)} / {insumo.unit}
+</span>
+                        </div>
+                        <div className={styles.insumoDetails}>
+                          <div className={styles.actionButtons}>
+                            <button onClick={() => handleDecrementInsumoQuantity(insumo.id, insumo.quantity)}>-</button>
+                            <span className={styles.quantityText}>{insumo.quantity} <span className={styles.unitText}>{insumo.unit}</span></span>
+                            <button onClick={() => handleIncrementInsumoQuantity(insumo.id, insumo.quantity)}>+</button>
+                          </div>
+                        </div>
+                      </li>
+                    )))}
+                  </ul>
+                );
+              })()}
+            </section>
+          </motion.div>
+        )}
+        {activeTab === "reportes" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <div className={styles.filterControls}>
+              <label htmlFor="date-filter">Filtrar por fecha:</label>
+              <input type="date" id="date-filter" className={styles.input} value={selectedDate || ""} onChange={(e) => setSelectedDate(e.target.value)}/>
+              {selectedDate && (<button onClick={() => setSelectedDate(null)} className={styles.clearButton}>Ver Todas</button>)}
+            </div>
+            <section className={styles.reportsGrid}>
+              <div className={styles.reportCard}><h4>Ingresos Totales</h4><p>${reportData.totalRevenue.toFixed(2)}</p></div>
+              <div className={`${styles.reportCard} ${styles.profitCard}`}><h4>Ganancia Neta</h4><p>${reportData.totalProfit.toFixed(2)}</p></div>
+              <div className={styles.reportCard}><h4>Ventas Realizadas</h4><p>{reportData.totalSalesCount}</p></div>
+              <div className={styles.reportCard}><h4>Producto Estrella</h4><p className={styles.smallText}>{reportData.mostProfitableProduct}</p></div>
+            </section>
+            <section className={`${styles.reportsGrid} ${styles.secondaryReports}`}>
+              <div className={styles.reportCard}><h4>Valor de Insumos (Costo)</h4><p>${reportData.inventoryValueByCost.toFixed(2)}</p></div>
+              <div className={styles.reportCard}><h4>Productos Definidos</h4><p>{products.length}</p></div>
+            </section>
+            <section className={styles.card}>
+              <h2>Historial Detallado de Ventas</h2>
+              <ul className={styles.ticketGroupList}>
+                {reportData.groupedSalesArray.length === 0 ? (<p>Aún no se han registrado ventas.</p>) : (reportData.groupedSalesArray.map((ticket) => (
+                  <li key={ticket.ticketId} className={styles.ticketGroup}>
+                    <div className={styles.ticketHeader}>
+                      <div className={styles.ticketDetails}>
+                        <span className={styles.ticketDate}>{ticket.date}</span>
+                        <span className={`${styles.paymentBadge} ${styles[ticket.paymentMethod]}`}>{ticket.paymentMethod}</span>
+                      </div>
+                      <div className={styles.ticketTotalLarge}>Total: <span>${ticket.total.toFixed(2)}</span></div>
+                    </div>
+                    <ul className={styles.ticketItemList}>
+                      {ticket.items.map((item) => (<li key={item.id} className={styles.ticketItemDetail}><span>{item.quantity} x {item.productName}</span><span>+${item.profit.toFixed(2)} ganancia</span></li>))}
+                    </ul>
+                  </li>
+                )))}
+              </ul>
+            </section>
+          </motion.div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {isModalOpen && editingItem && (
+          <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className={styles.modalContent} initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }}>
+              <h2>Editar Producto</h2>
+              <form onSubmit={handleUpdateProduct}>
+                <div className={styles.inputGroup}>
+                  <label>Nombre del Producto</label>
+                  <input type="text" className={styles.input} value={editingItem.name} onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}/>
+                </div>
+                <div className={styles.inputGroup}>
+                  <label>Precio de Venta ($)</label>
+                  <input type="number" className={styles.input} value={editingItem.price} onChange={(e) => setEditingItem({ ...editingItem, price: e.target.value })}/>
+                </div>
+                <div className={styles.inputGroup}>
+                  <label>Costo de Producción ($)</label>
+                  <input type="number" className={styles.input} value={editingItem.cost} onChange={(e) => setEditingItem({ ...editingItem, cost: e.target.value })}/>
+                </div>
+                <div className={styles.modalActions}>
+                  <button type="button" onClick={() => setIsModalOpen(false)} className={styles.buttonSecondary}>Cancelar</button>
+                  <button type="submit" className={styles.button}>Guardar Cambios</button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+export default DashboardPage;

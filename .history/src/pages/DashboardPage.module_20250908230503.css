@@ -1,0 +1,653 @@
+/* src/pages/DashboardPage.module.css (COMPLETO Y CORREGIDO) */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboardContainer {
+  width: 100%;
+  max-width: 800px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin-bottom: 0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+}
+
+.tabButton {
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: -1px;
+}
+
+.tabButton:hover {
+  color: var(--color-text-primary);
+}
+
+.activeTab {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.card {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.card h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+}
+
+.formGrid {
+  display: grid;
+  /* grid-template-columns: 2fr 1fr 1fr 1fr auto; */
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.input, select {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(138, 92, 246, 0.3);
+}
+
+.button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* --- ESTILOS DEL GRID DE INVENTARIO --- */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.productCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.productCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.productImagePlaceholder {
+  height: 120px;
+  background-color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.productCardInfo {
+  padding: 1rem;
+}
+
+.productCardName {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.productCardPrice {
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.productCardStock {
+  padding: 0 1rem 1rem;
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quantityText {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
+}
+
+.actionButtons button {
+  padding: 0.4rem 0.8rem;
+  background-color: #374151;
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.actionButtons button:hover {
+  background-color: #4b5563;
+}
+
+.productCardActions {
+  border-top: 1px solid var(--color-border);
+  padding: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  background-color: rgba(0,0,0,0.1);
+}
+
+.actionButton {
+  padding: 0.4rem 0.8rem;
+  background-color: #4b5563;
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #6b7280;
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.8);
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+/* --- OTROS ESTILOS (Ventas, Reportes, Modal, etc.) --- */
+.salesFormGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.logoutButton {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+.ticketList {
+  list-style: none;
+  margin-bottom: 1.5rem;
+}
+
+.ticketItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ticketSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.paymentOptions {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.paymentOptions label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.ticketTotal {
+  text-align: right;
+}
+
+.ticketTotal strong {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-right: 1rem;
+}
+
+.ticketTotal span {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.finalizeButton {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #10b981;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.finalizeButton:hover {
+  background-color: #059669;
+}
+
+.finalizeButton:disabled {
+  background-color: #374151;
+  cursor: not-allowed;
+}
+
+.reportsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.secondaryReports {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.reportCard {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.reportCard h4 {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.reportCard p {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.reportCard .smallText {
+  font-size: 1.2rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profitCard p {
+  color: #10b981;
+}
+
+.salesList {
+  list-style: none;
+}
+
+.salesItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.salesItem:first-child {
+  padding-top: 0;
+}
+
+.salesItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.saleDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.profitText {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.saleDate {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.paymentBadge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.efectivo {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.tarjeta {
+  background-color: rgba(138, 92, 246, 0.2);
+  color: var(--color-primary);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(17, 24, 39, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background-color: var(--color-surface);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid var(--color-border);
+}
+
+.modalContent h2 {
+  margin-top: 0;
+}
+
+.inputGroup {
+  margin-bottom: 1rem;
+}
+
+.inputGroup label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.modalActions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.buttonSecondary {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.buttonSecondary:hover {
+  background-color: var(--color-border);
+}
+
+@media (max-width: 600px) {
+  .formGrid, .salesFormGrid {
+    grid-template-columns: 1fr; 
+  }
+}
+
+/* REEMPLAZA LAS CLASES .ticketGroupList, .ticketGroup, etc. CON TODO ESTE BLOQUE */
+
+.ticketGroupList {
+  list-style: none; /* Quita las viñetas de la lista principal */
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Espacio entre cada tarjeta de ticket */
+}
+
+.ticketGroup {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  background-color: rgba(0, 0, 0, 0.1); /* Un fondo ligeramente más oscuro */
+}
+
+.ticketHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ticketDetails {
+  display: flex;
+  align-items: center; /* Alinea la fecha y el badge en la misma línea */
+  gap: 1rem;
+}
+
+.ticketDate {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.ticketTotalLarge {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.ticketTotalLarge span {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-left: 0.5rem;
+}
+
+.ticketItemList {
+  list-style: none; /* Quita las viñetas de la lista de productos */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ticketItemDetail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  padding: 0.25rem 0;
+}
+
+.ticketItemDetail span:last-child {
+  color: #10b981; /* Color verde de ganancia */
+  font-weight: 500;
+}
+
+.filterControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.filterControls label {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.filterControls input[type="date"] {
+  /* Los estilos generales de .input ya se aplican, pero podemos ajustar */
+  padding: 0.6rem 1rem;
+  max-width: 200px;
+}
+
+.clearButton {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+.searchBar {
+  margin-bottom: 1.5rem;
+}
+
+.productCardName mark {
+  background-color: var(--color-primary); /* Fondo morado */
+  color: var(--color-text-primary);     /* Texto blanco */
+  padding: 0 2px; /* Un poco de espacio interno */
+  border-radius: 3px;
+}
+
+/* --- ESTILOS PARA EL MÓDULO DE INSUMOS --- */
+.insumoFormGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.insumoList {
+  list-style: none;
+}
+
+.insumoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.2s;
+}
+
+.insumoItem.lowStock {
+  background-color: rgba(245, 158, 11, 0.1); /* Fondo ámbar sutil */
+  border-left: 4px solid #f59e0b;
+  padding-left: calc(1rem - 4px);
+}
+
+.insumoName {
+  font-weight: 500;
+}
+
+.insumoDetails {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.unitText {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-left: 0.25rem;
+}
+
+.insumoActions {
+  display: flex;
+  gap: 0.5rem;
+}

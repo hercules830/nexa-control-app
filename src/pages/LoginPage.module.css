@@ -1,0 +1,170 @@
+/* src/pages/LoginPage.module.css */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .loginContainer {
+    width: 100%;
+    max-width: 400px;
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .loginCard {
+    background-color: var(--color-surface);
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 600;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .inputGroup {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .input {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(138, 92, 246, 0.3);
+  }
+  
+  .button {
+    padding: 0.9rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .button:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  .errorText {
+    color: #ef4444; /* Rojo para errores */
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .buttonSecondary {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+  }
+  
+  .buttonSecondary:hover {
+    background-color: rgba(138, 92, 246, 0.1);
+  }
+
+  /* Estilos para el boton de retorno de loginpage a welcomePage */
+
+  .backLink {
+    margin-top: 5rem;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgba(138, 92, 246, 0.39);
+  }
+  
+  .backLink:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(138, 92, 246, 0.45);
+    background-color: var(--color-primary-hover);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin: 1.5rem 0;
+  }
+  
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .divider:not(:empty)::before {
+    margin-right: .5em;
+  }
+  
+  .divider:not(:empty)::after {
+    margin-left: .5em;
+  }
+  
+  .googleButton {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 1.5rem; /* Espacio antes del link de "Volver" */
+  }
+  
+  .googleButton:hover {
+    background-color: #f2f2f2;
+  }
+  
+  .googleIcon {
+    width: 20px;
+    height: 20px;
+  }

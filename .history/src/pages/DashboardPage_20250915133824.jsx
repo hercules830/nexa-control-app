@@ -1506,7 +1506,6 @@ function DashboardPage({ user }) {
               {editingItem.itemType === "product" && (
                 <form onSubmit={handleUpdateProduct}>
                   <h2>Editar Producto</h2>
-
                   {editingItem.image_url && (
                     <img
                       src={editingItem.image_url}
@@ -1514,34 +1513,6 @@ function DashboardPage({ user }) {
                       className={styles.modalImagePreview}
                     />
                   )}
-
-                  <div className={styles.inputGroup}>
-                    <label>Cambiar Imagen (Opcional)</label>
-                    <input
-                      type="file"
-                      accept="image/png, image/jpeg"
-                      className={styles.input}
-                      onChange={(e) =>
-                        setEditingItem({
-                          ...editingItem,
-                          newImageFile: e.target.files[0],
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.inputGroup}>
-                    <label>Nombre del Producto</label>
-                    <input
-                      type="text"
-                      className={styles.input}
-                      value={editingItem.name}
-                      onChange={(e) =>
-                        setEditingItem({ ...editingItem, name: e.target.value })
-                      }
-                      disabled={editingItem.type === "direct"}
-                    />
-                  </div>
                   <div className={styles.inputGroup}>
                     <label>Precio de Venta ($)</label>
                     <input

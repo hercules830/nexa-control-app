@@ -1,0 +1,36 @@
+/* src/index.css */
+
+:root {
+    /* Paleta de Colores */
+    --color-primary: #030033; /* Un morado vibrante como acento */
+    --color-primary-hover: #06023b;
+    --color-bg: #111827;      /* Fondo principal (casi negro) */
+    --color-surface: #1f2937; /* Color para "tarjetas" y superficies */
+    --color-border: #374151;
+    --color-text-primary: #f9fafb; /* Texto principal (blanco roto) */
+    --color-text-secondary: #9ca3af; /* Texto secundario (gris claro) */
+  
+    /* Sombras */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Poppins', sans-serif; /* Usamos nuestra nueva fuente */
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    line-height: 1.6;
+  }
+  
+  #root {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center;     /* Centra verticalmente */
+    padding: 2rem 1rem;
+    min-height: 100vh;
+  }

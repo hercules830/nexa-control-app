@@ -37,7 +37,7 @@ function PricingPage({ onNavigateToLogin }) {
         <div className={`${styles.pricingCard} ${styles.featuredCard}`}>
           <div className={styles.popularBadge}>Más Popular</div>
           <h3>Pro</h3>
-          <p className={styles.price}>$550 <span>/ MXN al mes</span></p>
+          <p className={styles.price}>$500 <span>/ MXN al mes</span></p>
           <ul className={styles.features}>
             <li>✓ Productos Ilimitados</li>
             <li>✓ Registro de Ventas</li>

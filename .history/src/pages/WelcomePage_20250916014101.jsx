@@ -1,11 +1,10 @@
-// RUTA: src/pages/WelcomePage.jsx
-// REEMPLAZA ESTE ARCHIVO COMPLETO
+// src/pages/WelcomePage.jsx
 
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import styles from './WelcomePage.module.css';
 
-// Cambiamos el nombre de la prop a 'onNavigateToLogin'
+// Recibimos una función como prop para notificar que queremos ir al login
 function WelcomePage({ onNavigateToLogin }) {
   return (
     <motion.div
@@ -27,8 +26,7 @@ function WelcomePage({ onNavigateToLogin }) {
           <p>✓ Control de inventario en tiempo real</p>
           <p>✓ Reportes automáticos y alertas</p>
         </div>
-        {/* El botón ahora llama a la función onNavigateToLogin */}
-        <button onClick={onNavigateToLogin} className={styles.ctaButton}>
+        <button onClick={onNavigateToLogin } className={styles.ctaButton}>
           Empezar Ahora
         </button>
       </div>

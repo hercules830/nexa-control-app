@@ -1,0 +1,84 @@
+// Ruta del archivo: src/pages/PricingPage.jsx
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { supabase } from '../supabaseClient';
+import styles from './PricingPage.module.css';
+import toast from 'react-hot-toast';
+
+function PricingPage({ onNavigateToLogin }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleCheckout = async (priceId) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { priceId: priceId },
+      });
+      if (error) throw error;
+      window.location.href = data.url;
+    } catch (error) {
+      toast.error(error.message || "No se pudo iniciar el proceso de pago.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div
+      className={styles.pricingContainer}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h1 className={styles.title}>Elige el Plan Perfecto para tu Negocio</h1>
+      <p className={styles.subtitle}>Comienza con 7 días de prueba gratis. Sin contratos, cancela cuando quieras.</p>
+
+      <div className={styles.cardsGrid}>
+        {/* --- Plan Básico --- */}
+        <div className={styles.pricingCard}>
+          <h3>Básico</h3>
+          <p className={styles.price}>$350 <span>/ MXN al mes</span></p>
+          <ul className={styles.features}>
+            <li>✓ Hasta 50 Productos</li>
+            <li>✓ Registro de Ventas</li>
+            <li>✓ Control de Inventario</li>
+            <li>✓ Reporte de Ganancias</li>
+          </ul>
+          {/* 
+            ¡ACCIÓN REQUERIDA!
+            Reemplaza 'TU_ID_DE_PRECIO_AQUÍ' con el ID de precio real de Stripe.
+          */}
+          <button 
+            onClick={() => handleCheckout('price_1S7tPQ25dmLg7iI6wGT6gAaT')} 
+            className={styles.ctaButton}
+            disabled={loading}
+          >
+            {loading ? 'Procesando...' : 'Comenzar Prueba'}
+          </button>
+        </div>
+
+        {/* --- Puedes añadir más planes aquí si los creas en Stripe --- */}
+        {/*
+        <div className={`${styles.pricingCard} ${styles.featuredCard}`}>
+          <h3>Pro</h3>
+          <p className={styles.price}>$550 <span>/ MXN al mes</span></p>
+          <ul className={styles.features}>
+             ...
+          </ul>
+          <button 
+            onClick={() => handleCheckout('OTRO_ID_DE_PRECIO')} 
+            className={styles.ctaButton}
+            disabled={loading}
+          >
+            {loading ? 'Procesando...' : 'Comenzar Prueba'}
+          </button>
+        </div>
+        */}
+      </div>
+    </motion.div>
+  );
+}
+
+export default PricingPage;

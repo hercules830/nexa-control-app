@@ -1,5 +1,5 @@
 // RUTA: src/App.jsx
-// ✅ ARCHIVO CORREGIDO
+// REEMPLAZA ESTE ARCHIVO COMPLETO
 
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -78,30 +78,34 @@ function App() {
     return <div>Cargando aplicación...</div>;
   }
 
+  const _handleNavigateToPricing = () => setCurrentView('pricing');
   const handleNavigateToLogin = () => setCurrentView('login');
   const handleNavigateToWelcome = () => setCurrentView('welcome');
 
-  // --- LÓGICA DE RENDERIZADO CORREGIDA ---
+  // --- LÓGICA DE RENDERIZADO CORREGIDA PARA EL NUEVO FLUJO ---
   const renderContent = () => {
-    // CASO 1: Usuario logueado Y con plan activo o de prueba
+    // CASO 1: El usuario está logueado Y tiene un plan activo o de prueba.
+    // Va directo al dashboard.
     if (user && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing')) {
       return <DashboardPage key="dashboardPage" user={user} />;
     }
     
-    // CASO 2: Usuario logueado PERO sin suscripción activa → mandarlo a Pricing
-    if (user && subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
+    // CASO 2: El usuario está logueado PERO no tiene un plan.
+    // Lo forzamos a ir a la página de precios para que elija uno.
+    if (user) {
       return <PricingPage key="pricingPage" onNavigateToLogin={handleNavigateToLogin} />;
     }
     
-    // CASO 3: Usuario NO logueado
+    // CASO 3: El usuario NO está logueado.
     switch (currentView) {
       case 'login':
         return <LoginPage key="loginPage" onNavigateToWelcome={handleNavigateToWelcome} />;
       case 'pricing':
-        // ⚠️ Un usuario sin sesión no debería ver precios hasta iniciar sesión
+        // Si un usuario sin sesión intenta ir a precios, lo mandamos a que inicie sesión primero.
         return <LoginPage key="loginPage" onNavigateToWelcome={handleNavigateToWelcome} />;
       case 'welcome':
       default:
+        // Ahora le pasamos la función para ir al login, con el nombre de prop correcto.
         return <WelcomePage key="welcomePage" onNavigateToLogin={handleNavigateToLogin} />;
     }
   };

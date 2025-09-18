@@ -1,76 +1,72 @@
-// src/pages/PricingPage.jsx
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { supabase } from "../supabaseClient";
-import styles from "./PricingPage.module.css";
-import toast from "react-hot-toast";
+// RUTA: src/pages/PricingPage.jsx
 
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { supabase } from '../supabaseClient';
+import styles from './PricingPage.module.css';
+import toast from 'react-hot-toast';
+
+// Esta página ahora solo se mostrará a usuarios que ya han iniciado sesión.
 function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
 
-  // Obtener usuario y perfil al montar
+  // Obtenemos el usuario al cargar la página
   useEffect(() => {
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("stripe_customer_id, email")
-          .eq("id", user.id)
-          .maybeSingle();
-        setProfile(profile);
-
-        // Si no hay cliente Stripe, reintenta crearlo
-        if (!profile?.stripe_customer_id) {
-          const { data: invokeData, error: invokeError } =
-            await supabase.functions.invoke("create-stripe-customer", {
-              body: { user_id: user.id, email: profile?.email || user.email },
-            });
-
-          if (invokeError) {
-            console.error("Error Stripe:", invokeError);
-            toast.error("No se pudo crear cliente en Stripe (intenta de nuevo).");
-          } else if (invokeData?.customerId) {
-            await supabase
-              .from("profiles")
-              .update({ stripe_customer_id: invokeData.customerId })
-              .eq("id", user.id);
-            setProfile({ ...profile, stripe_customer_id: invokeData.customerId });
-            toast.success("Cliente Stripe creado correctamente.");
-          }
-        }
-      }
-    };
-    loadUser();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data?.user || null);
+    });
   }, []);
 
   const handleCheckout = async (priceId) => {
     setLoading(true);
+
     try {
-      if (!user) throw new Error("Usuario no encontrado.");
-      if (!profile?.stripe_customer_id) throw new Error("Cliente de Stripe no disponible.");
+      if (!user) {
+        throw new Error("Usuario no encontrado. Por favor, inicia sesión de nuevo.");
+      }
 
-      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: {
-          priceId,
-          userId: user.id,
-          customerId: profile.stripe_customer_id,
-          origin: window.location.origin,
-        },
-      });
+      // 1. Obtenemos el customerId desde la tabla profiles
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("stripe_customer_id")
+        .eq("id", user.id)
+        .single();
 
-      if (error) throw error;
+      if (profileError) {
+        throw new Error("No se pudo obtener el perfil del usuario.");
+      }
+
+      if (!profile?.stripe_customer_id) {
+        throw new Error("No se encontró un cliente en Stripe para este usuario.");
+      }
+
+      // 2. Llamamos a la Edge Function con el body correcto
+      const { data, error } = await supabase.functions.invoke(
+        "create-checkout-session",
+        {
+          body: {
+            priceId,                      // ID del plan en Stripe
+            userId: user.id,              // UUID del usuario en Supabase
+            customerId: profile.stripe_customer_id, // Cliente en Stripe
+            origin: window.location.origin,        // URL de origen (para success/cancel)
+          },
+        }
+      );
+
+      if (error) {
+        console.error("Error desde función:", error);
+        throw new Error(error.message || "Error al iniciar el checkout.");
+      }
+
+      // 3. Redirigimos al usuario a la URL de Stripe
       if (data?.url) {
         window.location.href = data.url;
       } else {
         throw new Error("No se recibió URL de Stripe.");
       }
-    } catch (err) {
-      toast.error(err.message || "No se pudo iniciar el checkout.");
+    } catch (error) {
+      toast.error(error.message || "No se pudo iniciar el proceso de pago.");
     } finally {
       setLoading(false);
     }

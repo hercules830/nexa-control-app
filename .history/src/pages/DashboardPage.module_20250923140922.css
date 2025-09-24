@@ -1,0 +1,768 @@
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboardContainer {
+  width: 100%;
+  max-width: 800px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  margin-bottom: 0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #3e3e52;
+  margin-bottom: 1.5rem;
+  
+  /* --- AÑADE ESTAS LÍNEAS PARA HACERLO RESPONSIVO --- */
+  overflow-x: auto; /* Permite el scroll horizontal si las pestañas no caben */
+  -webkit-overflow-scrolling: touch; /* Mejora la experiencia de scroll en iOS */
+  scrollbar-width: none; /* Oculta la barra de scroll en Firefox */
+}
+
+/* Oculta la barra de scroll en Chrome/Safari */
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  margin-bottom: -1px;
+  white-space: nowrap;
+}
+
+.tabButton:hover {
+  color: var(--color-text-primary);
+}
+
+.activeTab {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.card {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.card h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.productFormGrid {
+  display: grid;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.input, select {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(138, 92, 246, 0.3);
+}
+
+.button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.productCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.productCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.productImagePlaceholder {
+  height: 120px;
+  background-color: #374151;
+}
+
+.productCardInfo {
+  padding: 1rem;
+}
+
+.productCardName {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.productCardPrice {
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.productCardStock {
+  padding: 0 1rem 1rem;
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quantityText {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
+}
+
+.actionButtons button {
+  padding: 0.4rem 0.8rem;
+  background-color: #374151;
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.actionButtons button:hover {
+  background-color: #4b5563;
+}
+
+.productCardActions {
+  border-top: 1px solid var(--color-border);
+  padding: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  background-color: rgba(0,0,0,0.1);
+}
+
+.actionButton {
+  padding: 0.4rem 0.8rem;
+  background-color: #4b5563;
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: #6b7280;
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.8);
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+.salesFormGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.logoutButton {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+.ticketList {
+  list-style: none;
+  margin-bottom: 1.5rem;
+}
+
+.ticketItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ticketSummary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.paymentOptions {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.paymentOptions label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.ticketTotal {
+  text-align: right;
+}
+
+.ticketTotal strong {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-right: 1rem;
+}
+
+.ticketTotal span {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.finalizeButton {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #10b981;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.finalizeButton:hover {
+  background-color: #059669;
+}
+
+.finalizeButton:disabled {
+  background-color: #374151;
+  cursor: not-allowed;
+}
+
+.reportsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.secondaryReports {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.reportCard {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.reportCard h4 {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.reportCard p {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.reportCard .smallText {
+  font-size: 1.2rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profitCard p {
+  color: #10b981;
+}
+
+.ticketGroupList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ticketGroup {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.ticketHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ticketDetails {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ticketDate {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.ticketTotalLarge {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.ticketTotalLarge span {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-left: 0.5rem;
+}
+
+.ticketItemList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ticketItemDetail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  padding: 0.25rem 0;
+}
+
+.ticketItemDetail span:last-child {
+  color: #10b981;
+}
+
+.filterControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.filterControls label {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.filterControls input[type="date"] {
+  padding: 0.6rem 1rem;
+  max-width: 200px;
+}
+
+.clearButton {
+  padding: 0.6rem 1.2rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+}
+
+.filtersContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Hacemos que en móvil los filtros se apilen */
+@media (max-width: 600px) {
+  .filtersContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.productCardName mark {
+  background-color: var(--color-primary);
+  color: var(--color-text-primary);
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.insumoFormGrid {
+  display: grid;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.insumoList {
+  list-style: none;
+}
+
+.insumoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.2s;
+  flex-wrap: wrap; /* Permite que los elementos pasen a la siguiente línea en móvil */
+  gap: 1rem; /* Espacio entre los grupos de elementos */
+}
+
+.insumoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.insumoName {
+  font-weight: 500;
+  font-size: 1rem; /* Ajustamos el tamaño */
+}
+
+/* --- AÑADE ESTA NUEVA CLASE --- */
+.insumoCost {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.insumoItem.lowStock {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-left: 4px solid #f59e0b;
+  padding-left: calc(1rem - 4px);
+}
+
+.insumoName {
+  font-weight: 500;
+}
+
+.insumoDetails {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espacio entre el control de stock y los botones de acción */
+  margin-left: auto; /* Empuja todo a la derecha */
+}
+
+.unitText {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-left: 0.25rem;
+}
+
+.insumoActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(17, 24, 39, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background-color: var(--color-surface);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid var(--color-border);
+}
+
+.modalContent h2 {
+  margin-top: 0;
+}
+
+.inputGroup {
+  margin-bottom: 1rem;
+}
+
+.inputGroup label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.modalActions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.buttonSecondary {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.buttonSecondary:hover {
+  background-color: var(--color-border);
+}
+
+/* --- ESTILOS RESPONSIVOS --- */
+/* Estas reglas se aplican en pantallas de 768px o menos (tablets y celulares) */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  /* Hacemos que todos los formularios de grid se apilen verticalmente */
+  .formGrid, .insumoFormGrid, .salesFormGrid, .productFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .ticketSummary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .ticketTotal {
+    text-align: left;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .filterControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterControls input[type="date"] {
+    max-width: none;
+  }
+}
+
+.recipeToggle {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.recipeToggle button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.formSectionTitle {
+  grid-column: 1 / -1; /* Ocupa todo el ancho */
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.chartContainer {
+  position: relative;
+  height: 350px; /* Le damos una altura fija */
+  width: 100%;
+}
+
+.productImage {
+  width: 100%;
+  height: 160px; /* <-- ALTURA FIJA (puedes ajustarla a 140px, 180px, etc.) */
+  object-fit: cover; /* <-- ESTA ES LA PROPIEDAD MÁGICA */
+  border-radius: 8px 8px 0 0;
+  background-color: #2d3748; /* Color de fondo mientras carga la imagen */
+  display: block; /* Previene espacios extra debajo de la imagen */
+}
+
+.productImagePlaceholder {
+  width: 100%;
+  height: 160px; /* <-- EXACTAMENTE LA MISMA ALTURA FIJA */
+  background-color: #374151; /* Un gris oscuro para el placeholder */
+  border-radius: 8px 8px 0 0;
+}
+
+.modalImagePreview {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-border); /* Asumiendo que tienes una variable --color-border, si no, usa #4a5568 */
+}
+
+.backButton {
+  background: none;
+  border: 1px solid #555;
+  color: #a0a0b0;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 2rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.backButton:hover {
+  background-color: #3e3e52;
+  color: #fff;
+}
+
+.subscriptionSection {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: #2c2c3e;
+  border-radius: 8px;
+}
+
+.subscriptionSection h4 {
+  margin-top: 0;
+}
+
+.subscriptionSection p {
+  color: #a0a0b0;
+}
+
+.cancelButton {
+  background-color: #d9534f; /* Un rojo suave */
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: #c9302c; /* Un rojo más oscuro al pasar el cursor */
+}
+
+.cancelButton:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}

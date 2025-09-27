@@ -16,9 +16,9 @@ serve(async (req) => {
   }
 
   try {
-    const { email, user_id } = await req.json();
-    if (!email || !user_id) {
-      throw new Error("Email y user_id son requeridos.");
+    const { email, userId } = await req.json();
+    if (!email || !userId) {
+      throw new Error("Email y userId son requeridos.");
     }
     
     // --- LÓGICA MEJORADA DE "BUSCAR O CREAR" ---
@@ -42,7 +42,7 @@ serve(async (req) => {
         email: email,
         // Es buena práctica añadir metadatos para saber de dónde viene el cliente
         metadata: {
-          supabase_user_id: user_id,
+          supabase_user_id: userId,
         },
       });
     }
@@ -52,7 +52,7 @@ serve(async (req) => {
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({ stripe_customer_id: customer.id })
-      .eq('id', user_id)
+      .eq('id', userId)
     
     if (updateError) {
         throw updateError

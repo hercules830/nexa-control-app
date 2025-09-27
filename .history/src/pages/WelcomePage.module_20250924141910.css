@@ -1,0 +1,83 @@
+/* src/pages/WelcomePage.module.css */
+
+.welcomeContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    max-width: 700px;
+  }
+  
+  .content {
+    background-color: var(--color-surface);
+    padding: 3rem 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .brandName {
+    color: var(--color-primary);
+  }
+  
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 2.5rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .features {
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+  }
+  
+  .ctaButton {
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgba(138, 92, 246, 0.39);
+  }
+  
+  .ctaButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(138, 92, 246, 0.45);
+    background-color: var(--color-primary-hover);
+  }
+  
+  @media (max-width: 600px) {
+    .title {
+      font-size: 2rem;
+    }
+    .content {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  .logoImage {
+    max-width: 400px; /* Ajusta el tamaño máximo del logo como prefieras */
+    width: 100%; /* Asegura que sea responsivo y no se salga del contenedor en móviles */
+    height: auto; /* Mantiene la proporción del logo */
+    margin-bottom: 1.5rem; /* Añade un espacio debajo del logo */
+  }
+
+  

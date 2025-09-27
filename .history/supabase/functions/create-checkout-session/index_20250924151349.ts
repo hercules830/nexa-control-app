@@ -21,21 +21,18 @@ serve(async (req) => {
       throw new Error("priceId y customerId son requeridos.");
     }
 
-    // --- ¡AQUÍ ESTÁ LA LÓGICA MEJORADA! ---
-    // 1. Leemos la variable de entorno para los días de prueba.
-    const trialDaysString = Deno.env.get("TRIAL_PERIOD_DAYS");
-    // 2. La convertimos a número. Si no existe, usamos 7 como valor por defecto.
-    const trialPeriodDays = Number(trialDaysString) || 7;
-
-
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
       customer: customerId,
       mode: "subscription",
+      
+      // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
+      // Este objeto le indica a Stripe que esta suscripción
+      // debe comenzar con un período de prueba de 7 días.
       subscription_data: {
-        // 3. Usamos la variable que acabamos de definir.
-        trial_period_days: trialPeriodDays,
+        trial_period_days: 7,
       },
+
       success_url: successUrl,
       cancel_url: cancelUrl,
     });

@@ -94,11 +94,7 @@ function MainApp() {
     return <div>Cargando aplicación...</div>;
   }
 
-  // ==================================================================
-  // --- ¡AQUÍ ESTÁ LA LÍNEA MODIFICADA! ---
-  // Añadimos 'canceled' como un estado válido para tener acceso al dashboard.
-  // ==================================================================
-  const isSubscribed = subscriptionStatus === "active" || subscriptionStatus === "trialing" || subscriptionStatus === "canceled";
+  const isSubscribed = subscriptionStatus === "active" || subscriptionStatus === "trialing";
 
   const RequireAuth = ({ children }) => !user ? <Navigate to="/login" replace /> : children;
   const RequireSubscription = ({ children }) => !isSubscribed ? <Navigate to="/pricing" replace /> : children;
@@ -127,6 +123,7 @@ function MainApp() {
           element={
             <RequireAuth>
               <RequireSubscription>
+                {/* --- ¡AQUÍ ESTÁ EL CAMBIO IMPORTANTE! --- */}
                 {/* Pasamos el estado de la suscripción y la función para refrescarlo */}
                 <DashboardPage 
                   user={user} 

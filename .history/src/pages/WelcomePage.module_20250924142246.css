@@ -98,27 +98,23 @@
 }
 
 /* --- Botón de Llamada a la Acción (CTA) --- */
-/* --- Botón de Llamada a la Acción (CTA) --- */
 .ctaButton {
   padding: 1rem 2.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 12px; /* Más redondeado */
   background-color: var(--color-primary);
   color: white;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
+  /* Transición más suave */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 0 4px 14px 0 rgba(138, 92, 246, 0.3);
-  /* Dejamos que Framer Motion maneje la animación de 'transform', 
-     así que solo transicionamos los otros estilos si es necesario. */
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  /* Damos una pista al navegador para que optimice la animación de transformación */
-  will-change: transform;
 }
 
 .ctaButton:hover {
-  /* Los efectos de 'transform' y 'box-shadow' ahora son manejados por 'whileHover' en el JSX,
-     pero podemos mantener el cambio de color de fondo aquí. */
+  transform: translateY(-3px); /* Un levantamiento más notorio */
+  box-shadow: 0 8px 25px 0 rgba(138, 92, 246, 0.4);
   background-color: var(--color-primary-hover);
 }
 

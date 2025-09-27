@@ -8,6 +8,7 @@ import HighlightText from "../components/HighlightText.jsx";
 import SalesChart from "../components/SalesChart.jsx";
 import ProfileDropdown from '../components/ProfileDropdown.jsx';
 import PasswordSettingForm from '../components/PasswordSettingForm.jsx';
+import { usePageTitle } from "../utils/usePageTitle";
 
 function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
   // --- ESTADOS ---
@@ -24,8 +25,7 @@ function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
   const [currentTicket, setCurrentTicket] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("efectivo");
   const [activeTab, setActiveTab] = useState("ventas");
-  // const [currentView, setCurrentView] = useState('tabs'); // ELIMINADO: Reemplazado por el estado del sidebar
-  const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false); // AÑADIDO: Para controlar el sidebar
+  const [currentView, setCurrentView] = useState('tabs');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -35,6 +35,7 @@ function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
   const [reponerInsumoId, setReponerInsumoId] = useState('');
   const [reponerCantidad, setReponerCantidad] = useState('');
   const [reponerCostoTotal, setReponerCostoTotal] = useState('');
+  // Cerca de la línea 25, junto a tus otros estados
   const [isCanceling, setIsCanceling] = useState(false);
 
   // --- FUNCIONES DE CARGA DE DATOS ---
@@ -62,23 +63,16 @@ function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
       
       toast.success("Tu suscripción ha sido programada para cancelación.");
       
-      // ¡Esta es la parte más importante!
-      // Llama a la función del componente padre (App.jsx) para refrescar el estado.
-      // Esto hará que `subscriptionStatus` se actualice de 'active' a 'canceled'
-      // sin necesidad de redirigir al usuario.
+      // Llama a la función del componente padre (App.jsx) para refrescar el estado
       if (refreshProfile) {
         refreshProfile();
       }
-
-      // NO HAGAS NINGUNA NAVEGACIÓN AQUÍ. El usuario debe permanecer en el dashboard.
-      // Por ejemplo, si tenías un navigate('/pricing'), elimínalo.
-
     } catch (error) {
       toast.error(error.message || "No se pudo cancelar la suscripción.");
     } finally {
       setIsCanceling(false);
     }
-};
+  };
 
 
   const fetchInsumos = async () => {
@@ -525,293 +519,328 @@ function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
         <ProfileDropdown
           user={user}
           onLogout={handleLogout}
-          onShowSettings={() => setIsSettingsSidebarOpen(true)} // MODIFICADO: para abrir el sidebar
+          onShowSettings={() => setCurrentView('settings')}
         />
       </header>
-      
-      {/* ELIMINADO: La lógica de currentView ya no es necesaria, se muestra el contenido principal siempre */}
-      <>
-        <nav className={styles.tabs}>
-          <button className={`${styles.tabButton} ${activeTab === "ventas" ? styles.activeTab : ""}`} onClick={() => setActiveTab("ventas")}>Ventas</button>
-          <button className={`${styles.tabButton} ${activeTab === "products" ? styles.activeTab : ""}`} onClick={() => setActiveTab("products")}>Mis Productos</button>
-          <button className={`${styles.tabButton} ${activeTab === "insumos" ? styles.activeTab : ""}`} onClick={() => setActiveTab("insumos")}>Insumos</button>
-          <button className={`${styles.tabButton} ${activeTab === "reportes" ? styles.activeTab : ""}`} onClick={() => setActiveTab("reportes")}>Reportes</button>
-        </nav>
-        <main className={styles.tabContent}>
-          {activeTab === "ventas" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-              <section className={styles.card}>
-                <h2>Crear Ticket de Venta</h2>
-                <form onSubmit={handleAddItemToTicket} className={styles.salesFormGrid}>
-                  <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)} className={styles.input}>
-                    <option value="" disabled>-- Selecciona un producto --</option>
-                    {products.map((product) => (<option key={product.id} value={product.id}>{product.name}</option>))}
-                  </select>
-                  <input type="number" placeholder="Cantidad" className={styles.input} value={saleQuantity} onChange={(e) => setSaleQuantity(Number(e.target.value))} min="1" />
-                  <button type="submit" className={styles.button}>Agregar al Ticket</button>
-                </form>
-              </section>
-              <section className={styles.card}>
-                <h2>Ticket Actual</h2>
-                <ul className={styles.ticketList}>
-                  {currentTicket.length === 0 ? (<p>Añade productos para empezar un nuevo ticket.</p>) : (
-                    currentTicket.map((item, index) => (
-                      <li key={index} className={styles.ticketItem}>
-                        <span>{item.quantity} x {item.name}</span>
-                        <span>${(item.price * item.quantity).toFixed(2)}</span>
-                      </li>
-                    ))
-                  )}
-                </ul>
-                <div className={styles.ticketSummary}>
-                  <div className={styles.paymentOptions}>
-                    <label><input type="radio" value="efectivo" checked={paymentMethod === "efectivo"} onChange={(e) => setPaymentMethod(e.target.value)}/>Efectivo</label>
-                    <label><input type="radio" value="tarjeta" checked={paymentMethod === "tarjeta"} onChange={(e) => setPaymentMethod(e.target.value)}/>Tarjeta</label>
-                  </div>
-                  <div className={styles.ticketTotal}>
-                    <strong>TOTAL:</strong>
-                    <span>${currentTicket.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}</span>
-                  </div>
-                </div>
-                <button onClick={handleFinalizeSale} className={styles.finalizeButton} disabled={currentTicket.length === 0}>Finalizar Venta</button>
-              </section>
-            </motion.div>
-          )}
-          {activeTab === "products" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-              <section className={styles.card}>
-                <h2>Agregar Nuevo Producto</h2>
-                <form onSubmit={handleAddProduct} className={styles.productFormGrid}>
-                  <div className={styles.productTypeSelector}>
-                    <label><input type="radio" value="direct" checked={newProduct.type === "direct"} onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value, recipe: [] })}/>Reventa (Usa 1 Insumo)</label>
-                    <label><input type="radio" value="recipe" checked={newProduct.type === "recipe"} onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value, insumoId: "" })}/>Producido (Usa Receta)</label>
-                  </div>
-                  {newProduct.type === "direct" ? (
-                    <select value={newProduct.insumoId} onChange={(e) => { const selectedInsumo = insumos.find((i) => i.id === Number(e.target.value)); setNewProduct({ ...newProduct, insumoId: e.target.value, name: selectedInsumo ? selectedInsumo.name : "" }); }} className={styles.input}>
-                      <option value="" disabled>-- Selecciona un Insumo para Vender --</option>
-                      {insumos.map((insumo) => (<option key={insumo.id} value={insumo.id}>{insumo.name}</option>))}
+
+      {currentView === 'tabs' ? (
+        <>
+          <nav className={styles.tabs}>
+            <button className={`${styles.tabButton} ${activeTab === "ventas" ? styles.activeTab : ""}`} onClick={() => setActiveTab("ventas")}>Ventas</button>
+            <button className={`${styles.tabButton} ${activeTab === "products" ? styles.activeTab : ""}`} onClick={() => setActiveTab("products")}>Mis Productos</button>
+            <button className={`${styles.tabButton} ${activeTab === "insumos" ? styles.activeTab : ""}`} onClick={() => setActiveTab("insumos")}>Insumos</button>
+            <button className={`${styles.tabButton} ${activeTab === "reportes" ? styles.activeTab : ""}`} onClick={() => setActiveTab("reportes")}>Reportes</button>
+          </nav>
+          <main className={styles.tabContent}>
+            {activeTab === "ventas" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                <section className={styles.card}>
+                  <h2>Crear Ticket de Venta</h2>
+                  <form onSubmit={handleAddItemToTicket} className={styles.salesFormGrid}>
+                    <select value={selectedProductId} onChange={(e) => setSelectedProductId(e.target.value)} className={styles.input}>
+                      <option value="" disabled>-- Selecciona un producto --</option>
+                      {products.map((product) => (<option key={product.id} value={product.id}>{product.name}</option>))}
                     </select>
-                  ) : (
-                    <input type="text" placeholder="Nombre del Producto con Receta" className={styles.input} value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}/>
-                  )}
-                  <input type="number" placeholder="Precio de Venta ($)" className={styles.input} value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} min="0" />
-                  <div className={styles.inputGroup}>
-                    <label htmlFor="productImage">Imagen del Producto (Opcional)</label>
-                    <input id="productImage" type="file" accept="image/png, image/jpeg" onChange={(e) => setNewProduct({ ...newProduct, imageFile: e.target.files[0] })} className={styles.input} />
+                    <input type="number" placeholder="Cantidad" className={styles.input} value={saleQuantity} onChange={(e) => setSaleQuantity(Number(e.target.value))} min="1" />
+                    <button type="submit" className={styles.button}>Agregar al Ticket</button>
+                  </form>
+                </section>
+                <section className={styles.card}>
+                  <h2>Ticket Actual</h2>
+                  <ul className={styles.ticketList}>
+                    {currentTicket.length === 0 ? (<p>Añade productos para empezar un nuevo ticket.</p>) : (
+                      currentTicket.map((item, index) => (
+                        <li key={index} className={styles.ticketItem}>
+                          <span>{item.quantity} x {item.name}</span>
+                          <span>${(item.price * item.quantity).toFixed(2)}</span>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                  <div className={styles.ticketSummary}>
+                    <div className={styles.paymentOptions}>
+                      <label><input type="radio" value="efectivo" checked={paymentMethod === "efectivo"} onChange={(e) => setPaymentMethod(e.target.value)}/>Efectivo</label>
+                      <label><input type="radio" value="tarjeta" checked={paymentMethod === "tarjeta"} onChange={(e) => setPaymentMethod(e.target.value)}/>Tarjeta</label>
+                    </div>
+                    <div className={styles.ticketTotal}>
+                      <strong>TOTAL:</strong>
+                      <span>${currentTicket.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)}</span>
+                    </div>
                   </div>
-                  {newProduct.type === "recipe" && (
-                    <>
-                      <h3 className={styles.recipeTitle}>Definir Receta</h3>
-                      <div className={styles.recipeFormGrid}>
-                        <select value={selectedInsumoIdForRecipe} onChange={(e) => setSelectedInsumoIdForRecipe(e.target.value)} className={styles.input}>
-                          <option value="" disabled>-- Selecciona Insumo --</option>
-                          {insumos.map((insumo) => (<option key={insumo.id} value={insumo.id}>{insumo.name} ({insumo.usage_unit})</option>))}
-                        </select>
-                        <input type="number" placeholder="Cantidad usada" className={styles.input} value={recipeQuantity} onChange={(e) => setRecipeQuantity(e.target.value)} min="0" />
-                        <button type="button" onClick={handleAddRecipeItem} className={styles.addRecipeButton}>+</button>
-                      </div>
-                      <ul className={styles.recipeList}>
-                        {newProduct.recipe.length === 0 ? (<li className={styles.recipeEmpty}>Aún no hay ingredientes.</li>) : (
-                          newProduct.recipe.map((item, index) => (
-                            <li key={index} className={styles.recipeItem}>
-                              <span>{item.quantityUsed} {item.unit} de {item.name}</span>
-                              <button type="button" onClick={() => handleRemoveRecipeItem(index)} className={styles.removeRecipeButton}>x</button>
+                  <button onClick={handleFinalizeSale} className={styles.finalizeButton} disabled={currentTicket.length === 0}>Finalizar Venta</button>
+                </section>
+              </motion.div>
+            )}
+            {activeTab === "products" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                <section className={styles.card}>
+                  <h2>Agregar Nuevo Producto</h2>
+                  <form onSubmit={handleAddProduct} className={styles.productFormGrid}>
+                    <div className={styles.productTypeSelector}>
+                      <label><input type="radio" value="direct" checked={newProduct.type === "direct"} onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value, recipe: [] })}/>Reventa (Usa 1 Insumo)</label>
+                      <label><input type="radio" value="recipe" checked={newProduct.type === "recipe"} onChange={(e) => setNewProduct({ ...newProduct, type: e.target.value, insumoId: "" })}/>Producido (Usa Receta)</label>
+                    </div>
+                    {newProduct.type === "direct" ? (
+                      <select value={newProduct.insumoId} onChange={(e) => { const selectedInsumo = insumos.find((i) => i.id === Number(e.target.value)); setNewProduct({ ...newProduct, insumoId: e.target.value, name: selectedInsumo ? selectedInsumo.name : "" }); }} className={styles.input}>
+                        <option value="" disabled>-- Selecciona un Insumo para Vender --</option>
+                        {insumos.map((insumo) => (<option key={insumo.id} value={insumo.id}>{insumo.name}</option>))}
+                      </select>
+                    ) : (
+                      <input type="text" placeholder="Nombre del Producto con Receta" className={styles.input} value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}/>
+                    )}
+                    <input type="number" placeholder="Precio de Venta ($)" className={styles.input} value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} min="0" />
+                    <div className={styles.inputGroup}>
+                      <label htmlFor="productImage">Imagen del Producto (Opcional)</label>
+                      <input id="productImage" type="file" accept="image/png, image/jpeg" onChange={(e) => setNewProduct({ ...newProduct, imageFile: e.target.files[0] })} className={styles.input} />
+                    </div>
+                    {newProduct.type === "recipe" && (
+                      <>
+                        <h3 className={styles.recipeTitle}>Definir Receta</h3>
+                        <div className={styles.recipeFormGrid}>
+                          <select value={selectedInsumoIdForRecipe} onChange={(e) => setSelectedInsumoIdForRecipe(e.target.value)} className={styles.input}>
+                            <option value="" disabled>-- Selecciona Insumo --</option>
+                            {insumos.map((insumo) => (<option key={insumo.id} value={insumo.id}>{insumo.name} ({insumo.usage_unit})</option>))}
+                          </select>
+                          <input type="number" placeholder="Cantidad usada" className={styles.input} value={recipeQuantity} onChange={(e) => setRecipeQuantity(e.target.value)} min="0" />
+                          <button type="button" onClick={handleAddRecipeItem} className={styles.addRecipeButton}>+</button>
+                        </div>
+                        <ul className={styles.recipeList}>
+                          {newProduct.recipe.length === 0 ? (<li className={styles.recipeEmpty}>Aún no hay ingredientes.</li>) : (
+                            newProduct.recipe.map((item, index) => (
+                              <li key={index} className={styles.recipeItem}>
+                                <span>{item.quantityUsed} {item.unit} de {item.name}</span>
+                                <button type="button" onClick={() => handleRemoveRecipeItem(index)} className={styles.removeRecipeButton}>x</button>
+                              </li>
+                            ))
+                          )}
+                        </ul>
+                      </>
+                    )}
+                    <button type="submit" className={styles.button} disabled={isUploading}>{isUploading ? "Guardando..." : "Guardar Producto"}</button>
+                  </form>
+                </section>
+                <section className={styles.card}>
+                  <h2>Mis Productos Vendibles</h2>
+                  <div className={styles.productGrid}>
+                    {products.length === 0 ? (<p>No has agregado productos.</p>) : (
+                      products.map((product) => (
+                        <div key={product.id} className={styles.productCard}>
+                          {product.image_url ? (<img src={product.image_url} alt={product.name} className={styles.productImage}/>) : (<div className={styles.productImagePlaceholder}></div>)}
+                          <div className={styles.productCardInfo}>
+                            <h4 className={styles.productCardName}>{product.name}</h4>
+                            <p className={styles.productCardPrice}>${product.price?.toFixed(2)}</p>
+                          </div>
+                          <div className={styles.productCardActions}>
+                            <button className={styles.actionButton} onClick={() => openEditModal(product, "product")}>Editar</button>
+                            <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeleteProduct(product.id, product.name)}>Borrar</button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </section>
+              </motion.div>
+            )}
+            {activeTab === "insumos" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <section className={styles.card}>
+                  <h2>Reponer Stock de Insumo Existente</h2>
+                  <form onSubmit={handleReponerStock} className={styles.insumoFormGrid}>
+                    <select value={reponerInsumoId} onChange={(e) => setReponerInsumoId(e.target.value)} className={styles.input}>
+                      <option value="">-- Selecciona un insumo --</option>
+                      {insumos.map(insumo => (
+                        <option key={insumo.id} value={insumo.id}>
+                          {insumo.name} (Unidad de Compra: {insumo.purchase_unit})
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      placeholder="Cantidad Comprada"
+                      value={reponerCantidad}
+                      onChange={(e) => setReponerCantidad(e.target.value)}
+                      className={styles.input}
+                      min="0"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Costo Total de la Compra ($)"
+                      value={reponerCostoTotal}
+                      onChange={(e) => setReponerCostoTotal(e.target.value)}
+                      className={styles.input}
+                      min="0"
+                      step="0.01"
+                    />
+                    <button type="submit" className={styles.button}>Reponer Stock</button>
+                  </form>
+                </section>
+                <section className={styles.card}>
+                  <h2>Añadir Insumo Nuevo (la primera vez)</h2>
+                  <form onSubmit={handleAddInsumo} className={styles.insumoFormGrid}>
+                    <h3 className={styles.formSectionTitle}>1. ¿Qué compraste?</h3>
+                    <input type="text" placeholder="Nombre del Insumo" className={styles.input} value={newInsumo.name} onChange={(e) => setNewInsumo({ ...newInsumo, name: e.target.value })}/>
+                    <input type="number" placeholder="Cantidad Comprada" className={styles.input} value={newInsumo.purchaseQuantity} onChange={(e) => setNewInsumo({ ...newInsumo, purchaseQuantity: e.target.value })} min="0" />
+                    <select className={styles.input} value={newInsumo.purchaseUnit} onChange={(e) => setNewInsumo({ ...newInsumo, purchaseUnit: e.target.value })}>
+                      <option value="kg">Kilogramo (kg)</option>
+                      <option value="lt">Litro (lt)</option>
+                      <option value="pz">Paquete/Caja (pz)</option>
+                    </select>
+                    <input type="number" placeholder="Costo Total de la Compra ($)" className={styles.input} value={newInsumo.totalCost} onChange={(e) => setNewInsumo({ ...newInsumo, totalCost: e.target.value })} min="0" />
+                    <h3 className={styles.formSectionTitle}>2. ¿Cómo lo usas en tus recetas?</h3>
+                    <select className={styles.input} value={newInsumo.usageUnit} onChange={(e) => setNewInsumo({ ...newInsumo, usageUnit: e.target.value })}>
+                      <option value="g">Gramo (g)</option>
+                      <option value="ml">Mililitro (ml)</option>
+                      <option value="pz">Pieza (pz)</option>
+                    </select>
+                    <input type="number" placeholder={`# de ${newInsumo.usageUnit} por cada ${newInsumo.purchaseUnit}`} className={styles.input} value={newInsumo.conversionRate} onChange={(e) => setNewInsumo({ ...newInsumo, conversionRate: e.target.value })} min="0" />
+                    <input type="number" placeholder={`Alerta de stock (en ${newInsumo.usageUnit})`} className={styles.input} value={newInsumo.alertThreshold} onChange={(e) => setNewInsumo({ ...newInsumo, alertThreshold: e.target.value })} />
+                    <button type="submit" className={styles.button}>Agregar Insumo</button>
+                  </form>
+                </section>
+                <section className={styles.card}>
+                  <h2>Inventario de Insumos</h2>
+                  <div className={styles.filtersContainer}>
+                    <input type="text" placeholder="Buscar insumo por nombre..." className={styles.input} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
+                    <select value={filterByProductId} onChange={(e) => setFilterByProductId(e.target.value)} className={styles.input}>
+                      <option value="">-- Filtrar por Receta de Producto --</option>
+                      {products.filter((p) => p.type === "recipe").map((product) => (<option key={product.id} value={product.id}>{product.name}</option>))}
+                    </select>
+                  </div>
+                  {(() => {
+                    let filteredInsumos = [...insumos];
+                    if (filterByProductId) {
+                      const selectedProduct = products.find((p) => p.id === Number(filterByProductId));
+                      if (selectedProduct && selectedProduct.recipe) {
+                        const recipeInsumoIds = selectedProduct.recipe.map((item) => item.insumoId);
+                        filteredInsumos = insumos.filter((insumo) => recipeInsumoIds.includes(insumo.id));
+                      }
+                    }
+                    if (searchTerm) {
+                      filteredInsumos = filteredInsumos.filter((insumo) => insumo.name.toLowerCase().includes(searchTerm.toLowerCase()));
+                    }
+                    return (
+                      <ul className={styles.insumoList}>
+                        {filteredInsumos.length === 0 ? (<p>No se encontraron insumos.</p>) : (
+                          filteredInsumos.map((insumo) => (
+                            <li key={insumo.id} className={`${styles.insumoItem} ${insumo.alert_threshold != null && insumo.stock_in_usage_unit <= insumo.alert_threshold ? styles.lowStock : ""}`}>
+                              <div className={styles.insumoInfo}>
+                                <span className={styles.insumoName}><HighlightText text={insumo.name} highlight={searchTerm}/></span>
+                                <span className={styles.insumoCost}>Costo: ${(insumo.cost_per_usage_unit || 0).toFixed(2)} / {insumo.usage_unit}</span>
+                              </div>
+                              <div className={styles.insumoDetails}>
+                                <div className={styles.actionButtons}>
+                                  <button onClick={() => handleDecrementInsumoQuantity(insumo.id, insumo.stock_in_usage_unit)}>-</button>
+                                  <span className={styles.quantityText}>{insumo.stock_in_usage_unit} <span className={styles.unitText}>{insumo.usage_unit}</span></span>
+                                  <button onClick={() => handleIncrementInsumoQuantity(insumo.id, insumo.stock_in_usage_unit)}>+</button>
+                                </div>
+                                <div className={styles.insumoActions}>
+                                  <button className={styles.actionButton} onClick={() => openEditModal(insumo, "insumo")}>Editar</button>
+                                  <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeleteInsumo(insumo.id, insumo.name)}>Borrar</button>
+                                </div>
+                              </div>
                             </li>
                           ))
                         )}
                       </ul>
-                    </>
-                  )}
-                  <button type="submit" className={styles.button} disabled={isUploading}>{isUploading ? "Guardando..." : "Guardar Producto"}</button>
-                </form>
-              </section>
-              <section className={styles.card}>
-                <h2>Mis Productos Vendibles</h2>
-                <div className={styles.productGrid}>
-                  {products.length === 0 ? (<p>No has agregado productos.</p>) : (
-                    products.map((product) => (
-                      <div key={product.id} className={styles.productCard}>
-                        {product.image_url ? (<img src={product.image_url} alt={product.name} className={styles.productImage}/>) : (<div className={styles.productImagePlaceholder}></div>)}
-                        <div className={styles.productCardInfo}>
-                          <h4 className={styles.productCardName}>{product.name}</h4>
-                          <p className={styles.productCardPrice}>${product.price?.toFixed(2)}</p>
-                        </div>
-                        <div className={styles.productCardActions}>
-                          <button className={styles.actionButton} onClick={() => openEditModal(product, "product")}>Editar</button>
-                          <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeleteProduct(product.id, product.name)}>Borrar</button>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                    );
+                  })()}
+                </section>
+              </motion.div>
+            )}
+            {activeTab === "reportes" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                <div className={styles.filterControls}>
+                  <label htmlFor="date-filter">Filtrar por fecha:</label>
+                  <input type="date" id="date-filter" className={styles.input} value={selectedDate || ""} onChange={(e) => setSelectedDate(e.target.value)}/>
+                  {selectedDate && (<button onClick={() => setSelectedDate(null)} className={styles.clearButton}>Ver Todas</button>)}
                 </div>
-              </section>
-            </motion.div>
-          )}
-          {activeTab === "insumos" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <section className={styles.card}>
-                <h2>Reponer Stock de Insumo Existente</h2>
-                <form onSubmit={handleReponerStock} className={styles.insumoFormGrid}>
-                  <select value={reponerInsumoId} onChange={(e) => setReponerInsumoId(e.target.value)} className={styles.input}>
-                    <option value="">-- Selecciona un insumo --</option>
-                    {insumos.map(insumo => (
-                      <option key={insumo.id} value={insumo.id}>
-                        {insumo.name} (Unidad de Compra: {insumo.purchase_unit})
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    placeholder="Cantidad Comprada"
-                    value={reponerCantidad}
-                    onChange={(e) => setReponerCantidad(e.target.value)}
-                    className={styles.input}
-                    min="0"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Costo Total de la Compra ($)"
-                    value={reponerCostoTotal}
-                    onChange={(e) => setReponerCostoTotal(e.target.value)}
-                    className={styles.input}
-                    min="0"
-                    step="0.01"
-                  />
-                  <button type="submit" className={styles.button}>Reponer Stock</button>
-                </form>
-              </section>
-              <section className={styles.card}>
-                <h2>Añadir Insumo Nuevo (la primera vez)</h2>
-                <form onSubmit={handleAddInsumo} className={styles.insumoFormGrid}>
-                  <h3 className={styles.formSectionTitle}>1. ¿Qué compraste?</h3>
-                  <input type="text" placeholder="Nombre del Insumo" className={styles.input} value={newInsumo.name} onChange={(e) => setNewInsumo({ ...newInsumo, name: e.target.value })}/>
-                  <input type="number" placeholder="Cantidad Comprada" className={styles.input} value={newInsumo.purchaseQuantity} onChange={(e) => setNewInsumo({ ...newInsumo, purchaseQuantity: e.target.value })} min="0" />
-                  <select className={styles.input} value={newInsumo.purchaseUnit} onChange={(e) => setNewInsumo({ ...newInsumo, purchaseUnit: e.target.value })}>
-                    <option value="kg">Kilogramo (kg)</option>
-                    <option value="lt">Litro (lt)</option>
-                    <option value="pz">Paquete/Caja (pz)</option>
-                  </select>
-                  <input type="number" placeholder="Costo Total de la Compra ($)" className={styles.input} value={newInsumo.totalCost} onChange={(e) => setNewInsumo({ ...newInsumo, totalCost: e.target.value })} min="0" />
-                  <h3 className={styles.formSectionTitle}>2. ¿Cómo lo usas en tus recetas?</h3>
-                  <select className={styles.input} value={newInsumo.usageUnit} onChange={(e) => setNewInsumo({ ...newInsumo, usageUnit: e.target.value })}>
-                    <option value="g">Gramo (g)</option>
-                    <option value="ml">Mililitro (ml)</option>
-                    <option value="pz">Pieza (pz)</option>
-                  </select>
-                  <input type="number" placeholder={`# de ${newInsumo.usageUnit} por cada ${newInsumo.purchaseUnit}`} className={styles.input} value={newInsumo.conversionRate} onChange={(e) => setNewInsumo({ ...newInsumo, conversionRate: e.target.value })} min="0" />
-                  <input type="number" placeholder={`Alerta de stock (en ${newInsumo.usageUnit})`} className={styles.input} value={newInsumo.alertThreshold} onChange={(e) => setNewInsumo({ ...newInsumo, alertThreshold: e.target.value })} />
-                  <button type="submit" className={styles.button}>Agregar Insumo</button>
-                </form>
-              </section>
-              <section className={styles.card}>
-                <h2>Inventario de Insumos</h2>
-                <div className={styles.filtersContainer}>
-                  <input type="text" placeholder="Buscar insumo por nombre..." className={styles.input} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/>
-                  <select value={filterByProductId} onChange={(e) => setFilterByProductId(e.target.value)} className={styles.input}>
-                    <option value="">-- Filtrar por Receta de Producto --</option>
-                    {products.filter((p) => p.type === "recipe").map((product) => (<option key={product.id} value={product.id}>{product.name}</option>))}
-                  </select>
-                </div>
-                {(() => {
-                  let filteredInsumos = [...insumos];
-                  if (filterByProductId) {
-                    const selectedProduct = products.find((p) => p.id === Number(filterByProductId));
-                    if (selectedProduct && selectedProduct.recipe) {
-                      const recipeInsumoIds = selectedProduct.recipe.map((item) => item.insumoId);
-                      filteredInsumos = insumos.filter((insumo) => recipeInsumoIds.includes(insumo.id));
-                    }
-                  }
-                  if (searchTerm) {
-                    filteredInsumos = filteredInsumos.filter((insumo) => insumo.name.toLowerCase().includes(searchTerm.toLowerCase()));
-                  }
-                  return (
-                    <ul className={styles.insumoList}>
-                      {filteredInsumos.length === 0 ? (<p>No se encontraron insumos.</p>) : (
-                        filteredInsumos.map((insumo) => (
-                          <li key={insumo.id} className={`${styles.insumoItem} ${insumo.alert_threshold != null && insumo.stock_in_usage_unit <= insumo.alert_threshold ? styles.lowStock : ""}`}>
-                            <div className={styles.insumoInfo}>
-                              <span className={styles.insumoName}><HighlightText text={insumo.name} highlight={searchTerm}/></span>
-                              <span className={styles.insumoCost}>Costo: ${(insumo.cost_per_usage_unit || 0).toFixed(2)} / {insumo.usage_unit}</span>
+                <section className={styles.card}>
+                  <h2>Ingresos por Producto</h2>
+                  <div className={styles.chartContainer}>
+                    {reportData.chartLabels && reportData.chartLabels.length > 0 ? (
+                      <SalesChart labels={reportData.chartLabels} dataValues={reportData.chartDataValues} />
+                    ) : (
+                      <p>No hay datos de ventas para mostrar en el gráfico.</p>
+                    )}
+                  </div>
+                </section>
+                <section className={styles.reportsGrid}>
+                  <div className={styles.reportCard}><h4>Ingresos Totales</h4><p>${reportData.totalRevenue.toFixed(2)}</p></div>
+                  <div className={`${styles.reportCard} ${styles.profitCard}`}><h4>Ganancia Neta</h4><p>${reportData.totalProfit.toFixed(2)}</p></div>
+                  <div className={styles.reportCard}><h4>Ventas Realizadas</h4><p>{reportData.totalSalesCount}</p></div>
+                  <div className={styles.reportCard}><h4>Producto Estrella</h4><p className={styles.smallText}>{reportData.mostProfitableProduct}</p></div>
+                </section>
+                <section className={`${styles.reportsGrid} ${styles.secondaryReports}`}>
+                  <div className={styles.reportCard}><h4>Valor de Insumos (Costo)</h4><p>${reportData.inventoryValueByCost.toFixed(2)}</p></div>
+                  <div className={styles.reportCard}><h4>Productos Definidos</h4><p>{products.length}</p></div>
+                </section>
+                <section className={styles.card}>
+                  <h2>Historial Detallado de Ventas</h2>
+                  <ul className={styles.ticketGroupList}>
+                    {reportData.groupedSalesArray.length === 0 ? (<p>Aún no se han registrado ventas.</p>) : (
+                      reportData.groupedSalesArray.map((ticket) => (
+                        <li key={ticket.ticketId} className={styles.ticketGroup}>
+                          <div className={styles.ticketHeader}>
+                            <div className={styles.ticketDetails}>
+                              <span className={styles.ticketDate}>{ticket.date}</span>
+                              <span className={`${styles.paymentBadge} ${styles[ticket.payment_method]}`}>{ticket.payment_method}</span>
                             </div>
-                            <div className={styles.insumoDetails}>
-                              <div className={styles.actionButtons}>
-                                <button onClick={() => handleDecrementInsumoQuantity(insumo.id, insumo.stock_in_usage_unit)}>-</button>
-                                <span className={styles.quantityText}>{insumo.stock_in_usage_unit} <span className={styles.unitText}>{insumo.usage_unit}</span></span>
-                                <button onClick={() => handleIncrementInsumoQuantity(insumo.id, insumo.stock_in_usage_unit)}>+</button>
-                              </div>
-                              <div className={styles.insumoActions}>
-                                <button className={styles.actionButton} onClick={() => openEditModal(insumo, "insumo")}>Editar</button>
-                                <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeleteInsumo(insumo.id, insumo.name)}>Borrar</button>
-                              </div>
-                            </div>
-                          </li>
-                        ))
-                      )}
-                    </ul>
-                  );
-                })()}
-              </section>
-            </motion.div>
-          )}
-          {activeTab === "reportes" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-              <div className={styles.filterControls}>
-                <label htmlFor="date-filter">Filtrar por fecha:</label>
-                <input type="date" id="date-filter" className={styles.input} value={selectedDate || ""} onChange={(e) => setSelectedDate(e.target.value)}/>
-                {selectedDate && (<button onClick={() => setSelectedDate(null)} className={styles.clearButton}>Ver Todas</button>)}
-              </div>
-              <section className={styles.card}>
-                <h2>Ingresos por Producto</h2>
-                <div className={styles.chartContainer}>
-                  {reportData.chartLabels && reportData.chartLabels.length > 0 ? (
-                    <SalesChart labels={reportData.chartLabels} dataValues={reportData.chartDataValues} />
-                  ) : (
-                    <p>No hay datos de ventas para mostrar en el gráfico.</p>
-                  )}
-                </div>
-              </section>
-              <section className={styles.reportsGrid}>
-                <div className={styles.reportCard}><h4>Ingresos Totales</h4><p>${reportData.totalRevenue.toFixed(2)}</p></div>
-                <div className={`${styles.reportCard} ${styles.profitCard}`}><h4>Ganancia Neta</h4><p>${reportData.totalProfit.toFixed(2)}</p></div>
-                <div className={styles.reportCard}><h4>Ventas Realizadas</h4><p>{reportData.totalSalesCount}</p></div>
-                <div className={styles.reportCard}><h4>Producto Estrella</h4><p className={styles.smallText}>{reportData.mostProfitableProduct}</p></div>
-              </section>
-              <section className={`${styles.reportsGrid} ${styles.secondaryReports}`}>
-                <div className={styles.reportCard}><h4>Valor de Insumos (Costo)</h4><p>${reportData.inventoryValueByCost.toFixed(2)}</p></div>
-                <div className={styles.reportCard}><h4>Productos Definidos</h4><p>{products.length}</p></div>
-              </section>
-              <section className={styles.card}>
-                <h2>Historial Detallado de Ventas</h2>
-                <ul className={styles.ticketGroupList}>
-                  {reportData.groupedSalesArray.length === 0 ? (<p>Aún no se han registrado ventas.</p>) : (
-                    reportData.groupedSalesArray.map((ticket) => (
-                      <li key={ticket.ticketId} className={styles.ticketGroup}>
-                        <div className={styles.ticketHeader}>
-                          <div className={styles.ticketDetails}>
-                            <span className={styles.ticketDate}>{ticket.date}</span>
-                            <span className={`${styles.paymentBadge} ${styles[ticket.payment_method]}`}>{ticket.payment_method}</span>
+                            <div className={styles.ticketTotalLarge}>Total: <span>${ticket.total.toFixed(2)}</span></div>
                           </div>
-                          <div className={styles.ticketTotalLarge}>Total: <span>${ticket.total.toFixed(2)}</span></div>
-                        </div>
-                        <ul className={styles.ticketItemList}>
-                          {ticket.items.map((item) => (
-                            <li key={item.id} className={styles.ticketItemDetail}>
-                              <span>{item.quantity} x {item.product_name}</span>
-                              <span>+${item.profit.toFixed(2)} ganancia</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </section>
-            </motion.div>
-          )}
-        </main>
-      </>
+                          <ul className={styles.ticketItemList}>
+                            {ticket.items.map((item) => (
+                              <li key={item.id} className={styles.ticketItemDetail}>
+                                <span>{item.quantity} x {item.product_name}</span>
+                                <span>+${item.profit.toFixed(2)} ganancia</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </section>
+              </motion.div>
+            )}
+          </main>
+        </>
+      ) : (
+        <main className={styles.tabContent}>
+          <button onClick={() => setCurrentView('tabs')} className={styles.backButton}>
+            &larr; Volver al Dashboard
+          </button>
+          <h2>Configuración de Cuenta</h2>
+          <p>Email: <strong>{user?.email}</strong></p>
+          <PasswordSettingForm />
 
-      {/* MODAL DE EDICIÓN (SIN CAMBIOS) */}
+
+
+
+        {/* --- AÑADE ESTE BLOQUE COMPLETO --- */}
+  <div className={styles.subscriptionSection}>
+    <h4>Gestionar Suscripción</h4>
+    {subscriptionStatus === 'active' || subscriptionStatus === 'trialing' ? (
+      <>
+        <p>Tu plan está actualmente activo.</p>
+        <button 
+          onClick={handleCancelSubscription} 
+          className={styles.cancelButton} // Asegúrate de crear este estilo en tu CSS
+          disabled={isCanceling}
+        >
+          {isCanceling ? "Cancelando..." : "Cancelar Suscripción al Final del Período"}
+        </button>
+      </>
+    ) : subscriptionStatus === 'canceled' ? (
+      <p>Tu suscripción ya está programada para cancelarse. Tu acceso permanecerá activo hasta el final del período.</p>
+    ) : (
+      <p>No tienes una suscripción activa. <a href="/pricing">Ver planes</a></p>
+    )}
+  </div>
+
+
+        </main>
+      )}
+
       <AnimatePresence>
         {isModalOpen && editingItem && (
           <motion.div className={styles.modalOverlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -868,78 +897,6 @@ function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* --- AÑADIDO: SIDEBAR DE CONFIGURACIÓN ANIMADO --- */}
-      <AnimatePresence>
-        {isSettingsSidebarOpen && (
-          <>
-            {/* Fondo oscuro */}
-            <motion.div
-              className={styles.sidebarOverlay}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={() => setIsSettingsSidebarOpen(false)}
-            />
-            
-            {/* Contenido del Sidebar */}
-            <motion.div
-              className={styles.settingsSidebar}
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            >
-              <div className={styles.sidebarHeader}>
-                <h2>Configuración</h2>
-                <button 
-                  onClick={() => setIsSettingsSidebarOpen(false)} 
-                  className={styles.sidebarCloseButton}
-                >
-                  &times;
-                </button>
-              </div>
-              <div className={styles.sidebarContent}>
-                <p>Email: <strong>{user?.email}</strong></p>
-                <PasswordSettingForm />
-                <div className={styles.subscriptionSection}>
-  <h4>Gestionar Suscripción</h4>
-
-  {/* Caso 1: La suscripción está activa o en prueba */}
-  {(subscriptionStatus === 'active' || subscriptionStatus === 'trialing') && (
-    <>
-      <p>Tu plan está actualmente activo.</p>
-      <button 
-        onClick={handleCancelSubscription} 
-        className={styles.cancelButton}
-        disabled={isCanceling}
-      >
-        {isCanceling ? "Cancelando..." : "Cancelar Suscripción al Final del Período"}
-      </button>
-    </>
-  )}
-
-  {/* Caso 2: La suscripción YA fue cancelada y expirará en el futuro */}
-  {subscriptionStatus === 'canceled' && (
-    <>
-      <p>Tu suscripción se cancelará al final de tu período. Tu acceso sigue activo hasta entonces.</p>
-      {/* Opcional pero recomendado: Añade una forma de reactivar */}
-      {/* <button className={styles.reactivateButton}>Reactivar Suscripción</button> */}
-    </>
-  )}
-
-  {/* Caso 3: No hay suscripción activa */}
-  {!(subscriptionStatus === 'active' || subscriptionStatus === 'trialing' || subscriptionStatus === 'canceled') && (
-      <p>No tienes una suscripción activa. <a href="/pricing">Ver planes</a></p>
-  )}
-</div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
     </motion.div>
   );
 }

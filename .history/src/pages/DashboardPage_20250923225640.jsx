@@ -62,23 +62,16 @@ function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
       
       toast.success("Tu suscripción ha sido programada para cancelación.");
       
-      // ¡Esta es la parte más importante!
-      // Llama a la función del componente padre (App.jsx) para refrescar el estado.
-      // Esto hará que `subscriptionStatus` se actualice de 'active' a 'canceled'
-      // sin necesidad de redirigir al usuario.
+      // Llama a la función del componente padre (App.jsx) para refrescar el estado
       if (refreshProfile) {
         refreshProfile();
       }
-
-      // NO HAGAS NINGUNA NAVEGACIÓN AQUÍ. El usuario debe permanecer en el dashboard.
-      // Por ejemplo, si tenías un navigate('/pricing'), elimínalo.
-
     } catch (error) {
       toast.error(error.message || "No se pudo cancelar la suscripción.");
     } finally {
       setIsCanceling(false);
     }
-};
+  };
 
 
   const fetchInsumos = async () => {
@@ -904,36 +897,24 @@ function DashboardPage({ user, subscriptionStatus, refreshProfile }) {
                 <p>Email: <strong>{user?.email}</strong></p>
                 <PasswordSettingForm />
                 <div className={styles.subscriptionSection}>
-  <h4>Gestionar Suscripción</h4>
-
-  {/* Caso 1: La suscripción está activa o en prueba */}
-  {(subscriptionStatus === 'active' || subscriptionStatus === 'trialing') && (
-    <>
-      <p>Tu plan está actualmente activo.</p>
-      <button 
-        onClick={handleCancelSubscription} 
-        className={styles.cancelButton}
-        disabled={isCanceling}
-      >
-        {isCanceling ? "Cancelando..." : "Cancelar Suscripción al Final del Período"}
-      </button>
-    </>
-  )}
-
-  {/* Caso 2: La suscripción YA fue cancelada y expirará en el futuro */}
-  {subscriptionStatus === 'canceled' && (
-    <>
-      <p>Tu suscripción se cancelará al final de tu período. Tu acceso sigue activo hasta entonces.</p>
-      {/* Opcional pero recomendado: Añade una forma de reactivar */}
-      {/* <button className={styles.reactivateButton}>Reactivar Suscripción</button> */}
-    </>
-  )}
-
-  {/* Caso 3: No hay suscripción activa */}
-  {!(subscriptionStatus === 'active' || subscriptionStatus === 'trialing' || subscriptionStatus === 'canceled') && (
-      <p>No tienes una suscripción activa. <a href="/pricing">Ver planes</a></p>
-  )}
-</div>
+                  <h4>Gestionar Suscripción</h4>
+                  {subscriptionStatus === 'active' || subscriptionStatus === 'trialing' ? (
+                    <>
+                      <p>Tu plan está actualmente activo.</p>
+                      <button 
+                        onClick={handleCancelSubscription} 
+                        className={styles.cancelButton}
+                        disabled={isCanceling}
+                      >
+                        {isCanceling ? "Cancelando..." : "Cancelar Suscripción al Final del Período"}
+                      </button>
+                    </>
+                  ) : subscriptionStatus === 'canceled' ? (
+                    <p>Tu suscripción ya está programada para cancelarse. Tu acceso permanecerá activo hasta el final del período.</p>
+                  ) : (
+                    <p>No tienes una suscripción activa. <a href="/pricing">Ver planes</a></p>
+                  )}
+                </div>
               </div>
             </motion.div>
           </>

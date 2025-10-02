@@ -1,0 +1,144 @@
+/* Limpieza: Se eliminaron clases duplicadas y no utilizadas */
+
+/* --- Contenedor Principal de la Página --- */
+/* Le damos un fondo con gradiente para añadir profundidad */
+.welcomeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh; /* Ocupa toda la altura de la pantalla */
+  padding: 2rem;
+  background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%);
+}
+
+/* --- La Tarjeta Principal (Efecto Vidrio) --- */
+/* Corregido: La clase en tu JSX probablemente es 'contentBox' */
+.contentBox {
+  width: 100%;
+  max-width: 600px; /* Un ancho máximo ideal */
+  padding: 3rem;
+  border-radius: 24px; /* Bordes más redondeados */
+  
+  /* Efecto "Glassmorphism" */
+  background: rgba(30, 41, 59, 0.5); /* Fondo semi-transparente */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Para Safari */
+
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  text-align: center;
+}
+
+/* --- Encabezado: Título y Logo --- */
+.logoHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem; /* Aumentamos el espacio inferior */
+}
+
+/* Título "Bienvenido a" mejorado */
+.welcomeTitle {
+  font-size: 1.5rem; /* Un tamaño más sutil */
+  font-weight: 400; /* Peso normal para un look limpio */
+  color: #94a3b8; /* Un gris azulado que complementa */
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* Logo con espaciado corregido */
+.logoImage {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  /* Ajustamos los márgenes negativos para el nuevo layout */
+  margin-top: -15px; 
+  margin-bottom: -25px;
+}
+
+/* --- Contenido de Texto --- */
+/* Subtítulo más legible */
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6; /* Mayor altura de línea para leer mejor */
+  margin-bottom: 2.5rem;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Lista de características con mejor estilo */
+.featureList {
+  list-style: none; /* Quitamos los puntos por defecto */
+  padding: 0;
+  margin: 0 auto 3rem auto; /* Aumentamos el margen inferior */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espacio entre elementos de la lista */
+  font-size: 1rem;
+  color: #cbd5e1;
+  max-width: 350px;
+  text-align: left; /* Alineamos a la izquierda para un look clásico */
+}
+
+.featureList li {
+  display: flex;
+  align-items: center;
+}
+
+/* Creamos el checkmark con CSS para un control total */
+.featureList li::before {
+  content: '✓';
+  color: var(--color-primary); /* Usamos tu color primario */
+  font-weight: 600;
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+}
+
+/* --- Botón de Llamada a la Acción (CTA) --- */
+/* --- Botón de Llamada a la Acción (CTA) --- */
+.ctaButton {
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px 0 rgba(138, 92, 246, 0.3);
+  /* Dejamos que Framer Motion maneje la animación de 'transform', 
+     así que solo transicionamos los otros estilos si es necesario. */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  /* Damos una pista al navegador para que optimice la animación de transformación */
+  will-change: transform;
+}
+
+.ctaButton:hover {
+  /* Los efectos de 'transform' y 'box-shadow' ahora son manejados por 'whileHover' en el JSX,
+     pero podemos mantener el cambio de color de fondo aquí. */
+  background-color: var(--color-primary-hover);
+}
+
+
+/* --- Estilos para Móviles --- */
+@media (max-width: 600px) {
+  .contentBox {
+    padding: 2.5rem 1.5rem; /* Ajustamos el padding */
+    border-radius: 20px;
+  }
+
+  .welcomeTitle {
+    font-size: 1.25rem;
+  }
+
+  .logoImage {
+    max-width: 280px;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+}

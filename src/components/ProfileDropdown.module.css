@@ -1,0 +1,82 @@
+.dropdownContainer {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropdownButton {
+    background-color: #8a2be2;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  
+  .dropdownButton:hover {
+    background-color: #7b24cc;
+  }
+  
+  .dropdownMenu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background-color: #2c2c3e;
+    border: 1px solid #444;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    min-width: 220px;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  
+  .userInfo {
+    padding: 1rem;
+    border-bottom: 1px solid #444;
+  }
+  
+  .userEmail {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #e0e0e0;
+    font-weight: bold;
+    word-break: break-all;
+  }
+  
+  .menuItem {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  
+  .menuItem:hover {
+    background-color: #3e3e52;
+  }
+  
+  .menuItem.logout {
+    color: #ff6b6b;
+  }
+
+  /* --- ESTILOS PARA MÓVILES (PANTALLAS DE HASTA 600px DE ANCHO) --- */
+@media (max-width: 600px) {
+  .dropdownMenu {
+    /* Fija el menú a la esquina superior derecha de la PANTALLA, no del botón */
+    position: fixed;
+    top: 60px; /* Un poco de espacio desde arriba */
+    right: 1rem; /* Un poco de espacio desde la derecha */
+    width: calc(100% - 2rem); /* Ocupa casi todo el ancho, con márgenes */
+    max-width: 250px; /* Pero no más de 250px */
+  }
+}

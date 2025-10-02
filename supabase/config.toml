@@ -1,0 +1,50 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Edge Functions
+# ──────────────────────────────────────────────────────────────────────────────
+
+[functions.create-stripe-customer]
+enabled = true
+verify_jwt = true
+import_map = "./functions/_shared/import_map.json"
+entrypoint = "./functions/create-stripe-customer/index.ts"
+
+[functions.create-checkout-session]
+enabled = true
+verify_jwt = true
+import_map = "./functions/_shared/import_map.json"
+entrypoint = "./functions/create-checkout-session/index.ts"
+
+[functions.cancel-subscription]
+enabled = true
+verify_jwt = true
+import_map = "./functions/_shared/import_map.json"
+entrypoint = "./functions/cancel-subscription/index.ts"
+
+[functions.stripe-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/_shared/import_map.json"
+entrypoint = "./functions/stripe-webhook/index.ts"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Auth (GoTrue)
+# ──────────────────────────────────────────────────────────────────────────────
+
+[auth]
+# URL base de la app (Vite) en local
+site_url = "http://localhost:5173"
+
+# URLs a las que PERMITES que Supabase redirija después de autenticarse
+# (no son los callback URLs de Google; esos se ponen en Google Cloud).
+additional_redirect_urls = [
+  "http://localhost:5173",
+  "http://localhost:5173/*",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5173/*"
+]
+
+# ── Proveedor: Google OAuth
+[auth.external.google]
+enabled = true
+client_id = "GOOGLE_CLIENT_ID"
+secret    = "GOOGLE_CLIENT_SECRET"

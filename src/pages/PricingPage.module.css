@@ -1,0 +1,118 @@
+/* src/pages/PricingPage.module.css */
+
+.pricingContainer {
+    width: 100%;
+    max-width: 1000px;
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 4rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    align-items: center;
+  }
+  
+  .pricingCard {
+    background-color: var(--color-surface);
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pricingCard:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .pricingCard h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  
+  .price {
+    font-size: 2.8rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
+  
+  .price span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+  }
+  
+  .features {
+    list-style: none;
+    text-align: left;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-grow: 1; /* Hace que esta sección crezca para empujar el botón hacia abajo */
+  }
+  
+  .ctaButton {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .ctaButton:hover {
+    background-color: var(--color-primary-hover);
+  }
+  
+  .featuredCard {
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+    position: relative;
+  }
+  
+  .popularBadge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-primary);
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  @media (max-width: 900px) {
+    .cardsGrid {
+      grid-template-columns: 1fr;
+    }
+    .featuredCard {
+      transform: scale(1);
+    }
+  }

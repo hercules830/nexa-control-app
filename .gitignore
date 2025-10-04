@@ -25,4 +25,11 @@ dist-ssr
 
 .vercel
 # Archivo de variables de entorno - ¡No subir!
+# Ignorar archivos de entorno con secretos
 .env
+.env.*
+supabase/.env
+supabase/.env.*
+
+# Ignorar historial del editor (VS Code, etc.)
+.history/

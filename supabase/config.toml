@@ -46,5 +46,5 @@ additional_redirect_urls = [
 # ── Proveedor: Google OAuth
 [auth.external.google]
 enabled = true
-client_id = "GOOGLE_CLIENT_ID"
-secret    = "GOOGLE_CLIENT_SECRET"
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret    = "env(GOOGLE_CLIENT_SECRET)"
